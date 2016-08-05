@@ -90,3 +90,23 @@ loadProblem n = do
   q <- readFile $ "problems" </> show n <.> "dat"
   let p = head $ fst <$> readP_to_S parseProblem q
   return p
+  
+
+data WiseDir = CW | CCW
+  deriving (Show, Eq)
+
+-- |
+-- >>> p25 <- loadProblem 25
+-- >>> map (clockWiseDir.snd) $ polygons p25
+-- [CCW,CW]
+clockWiseDir :: Polygon -> WiseDir
+clockWiseDir p = if foldr (\x xs -> f x + xs) 0 ps >= 0
+                 then CCW
+                 else CW
+  where
+    f :: (Vertex, Vertex) -> Rational
+    f (v1, v2) = xcoord v1 * ycoord v2 - xcoord v2 * ycoord v1
+    ps :: [(Vertex, Vertex)]
+    ps = take (nVertex p + 1) $ zip xs (tail xs)
+      where
+        (xs, vs) = (vs ++ xs, map snd $ vertice p)
