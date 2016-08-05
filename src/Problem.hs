@@ -80,3 +80,10 @@ genSimpleAnswer n = do
     mv (dx, dy) (x, y) = (x+dx, y+dy)
     showR r = show (numerator r) ++ "/" ++ show (denominator r)
     showT (x, y) = showR x ++ "," ++ showR y
+
+moveVertex :: Vertex -> Vertex -> Vertex
+moveVertex (Vertex x y) (Vertex dx dy) = (Vertex (x + dx) (y + dy))
+
+moveSegment :: Vertex -> Segment -> Segment
+moveSegment v (dom, codom) = (moveVertex v dom, moveVertex v codom)
+
