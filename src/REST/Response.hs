@@ -202,9 +202,9 @@ data Problem =
   Problem
   { problem_ranking           ::  [Ranking]
   , problem_publish_time      ::  Timestamp
-  , problem_solution_size     ::  Int
+  , problem_solution_size     ::  Size
   , problem_problem_id        ::  Int
-  , problem_owner             ::  Int
+  , problem_owner             ::  String
   , problem_problem_size      ::  Size
   , problem_problem_spec_hash ::  String
   } deriving (Eq, Show, Generic)
@@ -220,6 +220,29 @@ instance FromJSON Problem where
     genericParseJSON
     Aeson.defaultOptions
     { Aeson.fieldLabelModifier = stripPrefix' "problem_" }
+
+_t_problem :: Maybe Problem
+_t_problem =
+  Aeson.decode . L8.pack $ concat
+  [ "{"
+  , "   \"ranking\":["
+  , "      {"
+  , "         \"resemblance\":1.0,"
+  , "         \"solution_size\":31"
+  , "      },"
+  , "      {"
+  , "         \"resemblance\":0.957441,"
+  , "         \"solution_size\":1472"
+  , "      }"
+  , "   ],"
+  , "   \"publish_time\":1469804400,"
+  , "   \"solution_size\":31,"
+  , "   \"problem_id\":2,"
+  , "   \"owner\":\"1\","
+  , "   \"problem_size\":39,"
+  , "   \"problem_spec_hash\":\"d5cc53ef095f64c04f2d6da3c73e5e5857e8fb74\""
+  , "}"
+  ]
 
 data LeaderBoard =
   LeaderBoard
@@ -239,6 +262,25 @@ instance FromJSON LeaderBoard where
     Aeson.defaultOptions
     { Aeson.fieldLabelModifier = stripPrefix' "leaderBoard_" }
 
+_t_leaderBoard :: Maybe [LeaderBoard]
+_t_leaderBoard =
+  Aeson.decode . L8.pack $ concat
+  [ "   ["
+  , "      {"
+  , "         \"username\":\"12\","
+  , "         \"score\":13334.670241"
+  , "      },"
+  , "      {"
+  , "         \"username\":\"13\","
+  , "         \"score\":5915.387804"
+  , "      },"
+  , "      {"
+  , "         \"username\":\"16\","
+  , "         \"score\":2953.208622"
+  , "      }"
+  , "   ]"
+  ]
+
 data User =
   User
   { user_username     :: String
@@ -257,11 +299,30 @@ instance FromJSON User where
     Aeson.defaultOptions
     { Aeson.fieldLabelModifier = stripPrefix' "user_" }
 
+_t_users :: Maybe [User]
+_t_users =
+  Aeson.decode . L8.pack $ concat
+  [ "   ["
+  , "      {"
+  , "         \"username\":\"13\","
+  , "         \"display_name\":\"Hattori Hanzo\""
+  , "      },"
+  , "      {"
+  , "         \"username\":\"12\","
+  , "         \"display_name\":\"Fuma Kotaro\""
+  , "      },"
+  , "      {"
+  , "         \"username\":\"16\","
+  , "         \"display_name\":\"Fujita Seiko\""
+  , "      }"
+  , "   ]"
+  ]
+
 data BlobSnapshot =
   BlobSnapshot
   { blobSnapshot_problems      :: [Problem]
   , blobSnapshot_snapshot_time :: Timestamp
-  , blobSnapshot_leaderBoard   :: [LeaderBoard]
+  , blobSnapshot_leaderboard   :: [LeaderBoard]
   , blobSnapshot_users         :: [User]
   } deriving (Eq, Show, Generic)
 
@@ -276,3 +337,68 @@ instance FromJSON BlobSnapshot where
     genericParseJSON
     Aeson.defaultOptions
     { Aeson.fieldLabelModifier = stripPrefix' "blobSnapshot_" }
+
+_t_blobSnapshot :: Maybe BlobSnapshot
+_t_blobSnapshot =
+  Aeson.decode . L8.pack $ concat
+  [ "{"
+  , "   \"problems\":["
+  , "      {"
+  , "         \"ranking\":[],"
+  , "         \"publish_time\":1469804400,"
+  , "         \"solution_size\":31,"
+  , "         \"problem_id\":1,"
+  , "         \"owner\":\"1\","
+  , "         \"problem_size\":39,"
+  , "         \"problem_spec_hash\":\"44f66105e0136a9ea0a4fa4b055c35318ed8840f\""
+  , "      },"
+  , "      {"
+  , "         \"ranking\":["
+  , "            {"
+  , "               \"resemblance\":1.0,"
+  , "               \"solution_size\":31"
+  , "            },"
+  , "            {"
+  , "               \"resemblance\":0.957441,"
+  , "               \"solution_size\":1472"
+  , "            }"
+  , "         ],"
+  , "         \"publish_time\":1469804400,"
+  , "         \"solution_size\":31,"
+  , "         \"problem_id\":2,"
+  , "         \"owner\":\"1\","
+  , "         \"problem_size\":39,"
+  , "         \"problem_spec_hash\":\"d5cc53ef095f64c04f2d6da3c73e5e5857e8fb74\""
+  , "      }"
+  , "   ],"
+  , "   \"snapshot_time\":1470096660,"
+  , "   \"leaderboard\":["
+  , "      {"
+  , "         \"username\":\"12\","
+  , "         \"score\":13334.670241"
+  , "      },"
+  , "      {"
+  , "         \"username\":\"13\","
+  , "         \"score\":5915.387804"
+  , "      },"
+  , "      {"
+  , "         \"username\":\"16\","
+  , "         \"score\":2953.208622"
+  , "      }"
+  , "   ],"
+  , "   \"users\":["
+  , "      {"
+  , "         \"username\":\"13\","
+  , "         \"display_name\":\"Hattori Hanzo\""
+  , "      },"
+  , "      {"
+  , "         \"username\":\"12\","
+  , "         \"display_name\":\"Fuma Kotaro\""
+  , "      },"
+  , "      {"
+  , "         \"username\":\"16\","
+  , "         \"display_name\":\"Fujita Seiko\""
+  , "      }"
+  , "   ]"
+  , "}"
+  ]
