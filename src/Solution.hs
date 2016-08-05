@@ -44,8 +44,25 @@ parseFacet = do
   ; return (nv,vs)
   }
 
-sample :: String
-sample = unlines
+check :: Solution -> [Bool]
+check s = map ($ s) conds
+
+type Condition = Solution -> Bool
+
+conds :: [Condition]
+conds = map cond [1..1]
+
+cond :: Int -> Condition
+cond 1 s = all inRange (map snd (svertice s))
+
+inRange :: Vertex -> Bool
+inRange v = 0 <= x && x <= 1 && 0 <= y && y <= 1
+  where
+    x = xcoord v
+    y = ycoord v
+
+sampleSolution :: String
+sampleSolution = unlines
   ["7"
   ,"0,0"
   ,"1,0"
