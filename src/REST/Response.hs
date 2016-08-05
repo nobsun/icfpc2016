@@ -5,6 +5,8 @@ module REST.Response (
   StatusSnapshot (..), Snapshot (..),
   ProblemSubmission (..),
   SolutionSubmission (..),
+
+  BlobSnapshot (..), Problem (..), Ranking (..), LeaderBoard (..), User (..),
   ) where
 
 import GHC.Generics (Generic)
@@ -17,7 +19,9 @@ import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Types as Aeson
 
 
+type Resemblance = Double
 type Timestamp = Word64
+type Size = Int
 
 stripPrefix' :: Eq a => [a] -> [a] -> [a]
 stripPrefix' pre s =
@@ -110,9 +114,9 @@ data ProblemSubmission =
   , problemSubmission_problem_id          ::  Int
   , problemSubmission_publish_time        ::  Timestamp
   , problemSubmission_solution_spec_hash  ::  String
-  , problemSubmission_solution_size       ::  Int
+  , problemSubmission_solution_size       ::  Size
   , problemSubmission_problem_spec_hash   ::  String
-  , problemSubmission_problem_size        ::  Int
+  , problemSubmission_problem_size        ::  Size
   } deriving (Eq, Show, Generic)
 
 instance ToJSON ProblemSubmission where
@@ -146,7 +150,7 @@ data SolutionSubmission =
   SolutionSubmission
   { solutionSubmission_ok                  ::  Bool
   , solutionSubmission_problem_id          ::  Int
-  , solutionSubmission_resemblance         ::  Double
+  , solutionSubmission_resemblance         ::  Resemblance
   , solutionSubmission_solution_spec_hash  ::  String
   , solutionSubmission_solution_size       ::  Int
   } deriving (Eq, Show, Generic)
@@ -174,3 +178,101 @@ _t_solutionSubmission =
   , "  \"solution_size\": 78"
   , "}"
   ]
+
+
+data Ranking =
+  Ranking
+  { ranking_resemblance   ::  Resemblance
+  , ranking_solution_size ::  Size
+  } deriving (Eq, Show, Generic)
+
+instance ToJSON Ranking where
+  toJSON =
+    genericToJSON
+    Aeson.defaultOptions
+    { Aeson.fieldLabelModifier = stripPrefix' "ranking_" }
+
+instance FromJSON Ranking where
+  parseJSON =
+    genericParseJSON
+    Aeson.defaultOptions
+    { Aeson.fieldLabelModifier = stripPrefix' "ranking_" }
+
+data Problem =
+  Problem
+  { problem_ranking           ::  [Ranking]
+  , problem_publish_time      ::  Timestamp
+  , problem_solution_size     ::  Int
+  , problem_problem_id        ::  Int
+  , problem_owner             ::  Int
+  , problem_problem_size      ::  Size
+  , problem_problem_spec_hash ::  String
+  } deriving (Eq, Show, Generic)
+
+instance ToJSON Problem where
+  toJSON =
+    genericToJSON
+    Aeson.defaultOptions
+    { Aeson.fieldLabelModifier = stripPrefix' "problem_" }
+
+instance FromJSON Problem where
+  parseJSON =
+    genericParseJSON
+    Aeson.defaultOptions
+    { Aeson.fieldLabelModifier = stripPrefix' "problem_" }
+
+data LeaderBoard =
+  LeaderBoard
+  { leaderBoard_username :: String
+  , leaderBoard_score    :: Double
+  } deriving (Eq, Show, Generic)
+
+instance ToJSON LeaderBoard where
+  toJSON =
+    genericToJSON
+    Aeson.defaultOptions
+    { Aeson.fieldLabelModifier = stripPrefix' "leaderBoard_" }
+
+instance FromJSON LeaderBoard where
+  parseJSON =
+    genericParseJSON
+    Aeson.defaultOptions
+    { Aeson.fieldLabelModifier = stripPrefix' "leaderBoard_" }
+
+data User =
+  User
+  { user_username     :: String
+  , user_display_name :: String
+  } deriving (Eq, Show, Generic)
+
+instance ToJSON User where
+  toJSON =
+    genericToJSON
+    Aeson.defaultOptions
+    { Aeson.fieldLabelModifier = stripPrefix' "user_" }
+
+instance FromJSON User where
+  parseJSON =
+    genericParseJSON
+    Aeson.defaultOptions
+    { Aeson.fieldLabelModifier = stripPrefix' "user_" }
+
+data BlobSnapshot =
+  BlobSnapshot
+  { blobSnapshot_problems      :: [Problem]
+  , blobSnapshot_snapshot_time :: Timestamp
+  , blobSnapshot_leaderBoard   :: [LeaderBoard]
+  , blobSnapshot_users         :: [User]
+  } deriving (Eq, Show, Generic)
+
+instance ToJSON BlobSnapshot where
+  toJSON =
+    genericToJSON
+    Aeson.defaultOptions
+    { Aeson.fieldLabelModifier = stripPrefix' "blobSnapshot_" }
+
+instance FromJSON BlobSnapshot where
+  parseJSON =
+    genericParseJSON
+    Aeson.defaultOptions
+    { Aeson.fieldLabelModifier = stripPrefix' "blobSnapshot_" }
