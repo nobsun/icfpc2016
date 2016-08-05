@@ -22,6 +22,7 @@ object SimpleApp extends App {
     val lines = Files.readAllLines(f.toPath()).toArray(Array[String]())
     val p = new Reader(lines).readProblem
     println(p)
+    Visualizer.saveImage(p, f.getAbsolutePath() + ".png")
   }
   
   println(fold(Vertex(0, 0), Vertex(0, 1), Vertex(0, 1)))
