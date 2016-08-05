@@ -1,8 +1,8 @@
 module Vertex where
 
-import Data.Char
+
 import Data.Bool
-import Data.Array
+
 import Data.Ratio
 import Text.ParserCombinators.ReadP
 
