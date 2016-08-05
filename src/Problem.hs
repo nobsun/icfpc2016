@@ -3,10 +3,14 @@ module Problem where
 import Text.ParserCombinators.ReadP
 import Vertex
 
+data Polygon = Polygon
+  { nVertex  :: Int
+  , vertice  :: [(Int, Vertex)]
+  }
+
 data Problem = Problem
   { nPolygon :: Int
-  , nVertex  :: Int
-  , vertice  :: [(Int, Vertex)]
+  , polygons :: [(Int, Polygon)]
   , nSegment :: Int
   , segments :: [Segment]
   }
@@ -14,10 +18,11 @@ data Problem = Problem
 type Segment = (Vertex, Vertex)
 
 instance Show Problem where
-  show p = unlines
-         $ show (nPolygon p) : show (nVertex  p)
-         : ( map (show . snd) (vertice p)
-             ++ show (nSegment p) : map showSegment (segments p))
+  show p = show (nPolygon p) ++ "\n" ++ foldr (++) "" (map (show . snd) (polygons p))
+         ++ show (nSegment p) ++ "\n" ++ unlines (map showSegment (segments p))
+
+instance Show Polygon where
+  show p = unlines $ show (nVertex p) : map (show . snd) (vertice p)
 
 showSegment :: Segment -> String
 showSegment (p,q) = unwords [show p, show q]
@@ -28,11 +33,17 @@ instance Read Problem where
 parseProblem :: ReadP Problem
 parseProblem = do
   { np <- parseInt
-  ; nv <- parseInt
-  ; ps <- count nv parseVertex
+  ; ps <- count np parsePolygon
   ; ns <- parseInt
   ; ss <- count ns parseSegment
-  ; return (Problem np nv (numbering 0 ps) ns ss)
+  ; return (Problem np (numbering 0 ps) ns ss)
+  }
+
+parsePolygon :: ReadP Polygon
+parsePolygon = do
+  { np <- parseInt
+  ; ps <- count np parseVertex
+  ; return (Polygon np (numbering 0 ps))
   }
 
 parseInt :: ReadP Int
