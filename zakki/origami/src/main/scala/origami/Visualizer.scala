@@ -9,7 +9,6 @@ import java.awt.Color
 import java.awt.Graphics2D
 import javax.imageio.ImageIO
 import java.io.File
-import java.util.regex.Pattern.Dot
 import origami.math._
 
 object Visualizer {

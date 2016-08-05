@@ -2,14 +2,6 @@ package origami
 
 import spire.implicits._
 import spire.math._
-import scala.collection.immutable.Vector
-import java.awt.image.BufferedImage
-import java.awt.geom._
-import java.awt.Color
-import java.awt.Graphics2D
-import javax.imageio.ImageIO
-import java.io.File
-import java.util.regex.Pattern.Dot
 import origami.math._
 
 case class Polygon(vertices: Vector[Vertex])
@@ -28,6 +20,9 @@ case class Edge(a: Vertex, b: Vertex) {
 }
 
 case class Problem(polygon: Vector[Polygon], edges: Vector[Edge])
+
+case class Facet(vertices: Vector[Vertex])
+
 
 class Reader(lines: Array[String]) {
   var pos = 0;

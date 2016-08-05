@@ -39,6 +39,15 @@ package object math {
     Transform(from.a, ax, ay, to.a, ax1, ay1, l2)
   }
 
+  def createTrans2(from: Edge, to: Edge): Transform = {
+    val ax = from.b - from.a
+    val ay = Vertex(ax.y, -ax.x)
+    val ax1 = to.b - to.a
+    val ay1 = Vertex(ax1.y, -ax1.x)*(-1)
+    val l2 = ax dot ax
+    Transform(from.a, ax, ay, to.a, ax1, ay1, l2)
+  }
+
   def transform(from: Edge, to: Edge, p: Vertex): Vertex = {
     createTrans(from, to).transform(p)
   }
@@ -51,13 +60,16 @@ package object math {
     val ay = Vertex(ax.y, -ax.x)
     val x = p0.dot(ax)
     val y = p0.dot(ay)
+    println("p: " + p + " p0: " + p0) 
+    println("a:" + ax + ", " + ay + " (" + x + ", " + y + ")") 
 
     val ax1 = to.b - to.a // / |ax1|
     val ay1 = Vertex(ax1.y, -ax1.x)
+    println("a1:" + ax1 + ", " + ay1)
 
     val l2 = ax dot ax // |ax1| / |ax1|
 
-    (ax1 * x + ay1 * y + to.a) / l2
+    (ax1 * x + ay1 * y) / l2 + to.a
   }
 }
 
@@ -103,11 +115,21 @@ package math {
 
   case class Transform(o: Vertex, ax: Vertex, ay: Vertex,
                        o1: Vertex, ax1: Vertex, ay1: Vertex, s: Rational) {
+    {
+    	if (s == 0)
+    	  throw new IllegalArgumentException
+    }
     def transform(p: Vertex): Vertex = {
       val p0 = p - o
       val x = p0.dot(ax)
       val y = p0.dot(ay)
-      (ax1 * x + ay1 * y + o1) / s
+      (ax1 * x + ay1 * y) / s + o1
     }
+  }
+
+  object Transform {
+    val ident = Transform(Vertex(0, 0), Vertex(1, 0), Vertex(0, 1),
+      Vertex(0, 0), Vertex(1, 0), Vertex(0, 1),
+      Rational(1))
   }
 }

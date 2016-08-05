@@ -58,6 +58,28 @@ class SimpleTest {
         Vertex(4, 5)))
 
     assertEquals(Vertex(0, 0),
+      _transform(
+        Edge(Vertex(10, 50), Vertex(15, 50)),
+        Edge(Vertex(0, 0), Vertex(5, 0)),
+        Vertex(10, 50)))
+    assertEquals(Vertex(1, 10),
+      _transform(
+        Edge(Vertex(10, 50), Vertex(15, 50)),
+        Edge(Vertex(0, 0), Vertex(5, 0)),
+        Vertex(11, 60)))
+
+    assertEquals(Vertex(0, 0),
+      _transform(
+        Edge(Vertex(10, 50), Vertex(11, 49)),
+        Edge(Vertex(0, 0), Vertex(1, 1)),
+        Vertex(10, 50)))
+    assertEquals(Vertex(1, 1),
+      _transform(
+        Edge(Vertex(10, 50), Vertex(11, 49)),
+        Edge(Vertex(0, 0), Vertex(1, 1)),
+        Vertex(11, 49)))
+
+    assertEquals(Vertex(0, 0),
       transform(
         Edge(Vertex(0, 0), Vertex(1, 0)),
         Edge(Vertex(0, 0), Vertex(0, 1)),
