@@ -1,9 +1,10 @@
 ICFPC 2016
 ===============
 
-# TeamID: 49
-
 # Team Sampou
+
+- TeamID: 49
+- Password: yX5MhqWXgsG3
 
 # Members
 
