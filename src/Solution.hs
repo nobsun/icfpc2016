@@ -1,7 +1,11 @@
 module Solution where
 
+import Data.Ord (comparing)
+import Data.List (group,sort)
+import Data.Function (on)
 import Text.ParserCombinators.ReadP
 import Vertex
+import Polygon
 import Problem
 
 data Solution = Solution
@@ -49,17 +53,24 @@ check s = map ($ s) conds
 
 type Condition = Solution -> Bool
 
+ncond :: Int
+ncond = 2
+
 conds :: [Condition]
-conds = map cond [1..1]
+conds = map cond [1..ncond]
 
 cond :: Int -> Condition
 cond 1 s = all inRange (map snd (svertice s))
+cond 2 s = uniqOccurrence (map snd (svertice s))
 
 inRange :: Vertex -> Bool
 inRange v = 0 <= x && x <= 1 && 0 <= y && y <= 1
   where
     x = xcoord v
     y = ycoord v
+
+uniqOccurrence :: [Vertex] -> Bool
+uniqOccurrence vs = length vs == length (group (sort vs))
 
 sampleSolution :: String
 sampleSolution = unlines
