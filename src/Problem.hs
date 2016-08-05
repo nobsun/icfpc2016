@@ -88,6 +88,6 @@ clockWiseDir p = if foldr (\x xs -> f x + xs) 0 ps >= 0
     f :: (Vertex, Vertex) -> Rational
     f (v1, v2) = xcoord v1 * ycoord v2 - xcoord v2 * ycoord v1
     ps :: [(Vertex, Vertex)]
-    ps = take (nVertex p + 1) $ zip xs (tail xs)
+    ps = take (pnVertex p + 1) $ zip xs (tail xs)
       where
-        (xs, vs) = (vs ++ xs, map snd $ vertice p)
+        (xs, vs) = (vs ++ xs, map snd $ pvertice p)
