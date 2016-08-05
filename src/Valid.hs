@@ -28,7 +28,7 @@ cond 5 s = all (simple (svertice s)) (facets s)
 cond 6 s = True
 cond 7 s = True
 cond 8 s = True
-cond 9 s = 5000 > length (filter (not . isSpace) (show s))
+cond 9 s = 5000 >= length (filter (not . isSpace) (show s))
 
 
 inRange :: Vertex -> Bool
