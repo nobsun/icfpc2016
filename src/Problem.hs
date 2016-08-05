@@ -36,6 +36,7 @@ parseProblem = do
   ; ps <- count np parsePolygon
   ; ns <- parseInt
   ; ss <- count ns parseSegment
+  ; char '\n'
   ; return (Problem np (numbering 0 ps) ns ss)
   }
 
