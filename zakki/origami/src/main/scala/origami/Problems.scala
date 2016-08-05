@@ -20,7 +20,13 @@ case class Vertex(x: Rational, y: Rational) {
 }
 
 case class Polygon(vertices: Vector[Vertex])
-case class Edge(a: Vertex, b: Vertex)
+case class Edge(a: Vertex, b: Vertex) {
+  def equals(pa: Vertex, pb: Vertex): Boolean = {
+    (a == pa && b == pb) || (a == pb && b == pa)
+  }
+}
+
+case class Facet(vertices: Vector[Vertex])
 
 case class Problem(polygon: Vector[Polygon], edges: Vector[Edge])
 
@@ -82,6 +88,86 @@ object Util {
       if (maxY < v.y) maxY = v.y
     }
     (minX, minY, maxX, maxY)
+  }
+
+  def isInner(v: Vertex, polygon: Vector[Vertex]) = {
+    var count = 0
+    for (i <- 0 until polygon.length) {
+      val pa = polygon(i)
+      val pb = polygon((i + 1) % polygon.length)
+      //val dx = pb.x - pa.x
+      //val dy = pb.y - pb.y
+
+      // 上向きの辺。点Pがy軸方向について、始点と終点の間にある。ただし、終点は含まない。(ルール1)
+      if (((pa.y <= v.y) && (pb.y > v.y))
+        // 下向きの辺。点Pがy軸方向について、始点と終点の間にある。ただし、始点は含まない。(ルール2)
+        || ((pa.y > v.y) && (pb.y <= v.y))) {
+        // ルール1,ルール2を確認することで、ルール3も確認できている。
+        // 辺は点pよりも右側にある。ただし、重ならない。(ルール4)
+        // 辺が点pと同じ高さになる位置を特定し、その時のxの値と点pのxの値を比較する。
+        val vt = (v.y - pa.y) / (pb.y - pa.y)
+        if (v.x < (pa.x + (vt * (pb.x - v.x)))) {
+          count += 1
+          //println(i, v, pa, pb)
+        }
+      }
+    }
+    //println("result " + count)
+    count % 2 == 1
+  }
+
+  def collectLine(p: Problem): Vector[Edge] = {
+    var edges: List[Edge] = Nil
+    val pe = for (p <- p.polygon; i <- 0 until p.vertices.length) {
+      val pa = p.vertices(i)
+      val pb = p.vertices((i + 1) % p.vertices.length)
+      if (!edges.exists(_.equals(pa, pb)))
+        edges ::= Edge(pa, pb)
+    }
+    for (e <- p.edges) {
+      if (!edges.exists(_.equals(e.a, e.b)))
+        edges ::= e
+    }
+    edges.toVector
+  }
+
+  def facets(p: Problem) = {
+    val edges = collectLine(p)
+    val map = edges.flatMap { e => List((e.a, e), (e.b, e)) }
+      .groupBy(t => t._1)
+      .mapValues(e => e.map(_._2))
+    var facets: Map[Set[Vertex], Facet] = Map()
+
+    def next(e: Edge, edges: Set[Edge], vs: List[Vertex]): Unit = {
+      //println("next " + e + " " + edges + "# " + vs);
+      val ep = vs.head
+      for (n <- map(ep) if !edges.contains(n)) {
+        //println("iter " + n + " " + e + " " + vs)
+        val (cp, np) =
+          if (n.a == ep) {
+            (n.a, n.b)
+          } else {
+            (n.b, n.a)
+          }
+        if (vs.contains(np)) {
+          if (vs.length > 2 && (vs.last == np)) {
+            //println("add " + n + vs)
+            facets += (vs.toSet -> Facet(vs.toVector))
+          } else {
+            //println("skip " + np + vs.last + " ## " + vs)
+          }
+        } else {
+          next(n, edges + n, np :: vs)
+        }
+      }
+    }
+    for (e <- edges) {
+      //println("#start " + e + " # " + e.a);
+      next(e, Set(e), List(e.a, e.b))
+      //println("#start " + e + " # " + e.b);
+      next(e, Set(e), List(e.b, e.a))
+    }
+    facets.values.toVector
   }
 }
 
