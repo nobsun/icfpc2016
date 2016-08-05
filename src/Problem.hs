@@ -63,4 +63,11 @@ sample = unlines
   ,"0,1 1,1"
   ]
 
+valid :: Show a => a -> IO Bool
+valid n = do
+  q <- readFile ("problems/"++show n++".dat")
+  p <- return $ head $ fst <$> readP_to_S parseProblem q
+  return (q == show p)
 
+validAll :: IO [Bool]
+validAll = mapM valid [1..101]
