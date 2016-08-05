@@ -1,12 +1,13 @@
 module Problem where
 
+import System.FilePath
 import Text.ParserCombinators.ReadP
+import Polygon
 import Vertex
 
 data Problem = Problem
   { nPolygon :: Int
-  , nVertex  :: Int
-  , vertice  :: [(Int, Vertex)]
+  , polygons :: [(Int, Polygon)]
   , nSegment :: Int
   , segments :: [Segment]
   }
@@ -15,9 +16,8 @@ type Segment = (Vertex, Vertex)
 
 instance Show Problem where
   show p = unlines
-         $ show (nPolygon p) : show (nVertex  p)
-         : ( map (show . snd) (vertice p)
-             ++ show (nSegment p) : map showSegment (segments p))
+         $  show (nPolygon p) : map (show . snd) (polygons p)
+         ++ show (nSegment p) : map showSegment (segments p)
 
 showSegment :: Segment -> String
 showSegment (p,q) = unwords [show p, show q]
@@ -28,15 +28,12 @@ instance Read Problem where
 parseProblem :: ReadP Problem
 parseProblem = do
   { np <- parseInt
-  ; nv <- parseInt
-  ; ps <- count nv parseVertex
+  ; ps <- count np parsePolygon
   ; ns <- parseInt
   ; ss <- count ns parseSegment
-  ; return (Problem np nv (numbering 0 ps) ns ss)
+  ; char '\n'
+  ; return (Problem np (numbering 0 ps) ns ss)
   }
-
-parseInt :: ReadP Int
-parseInt = skipSpaces >> readS_to_P (readsPrec 0)
 
 parseSegment :: ReadP Segment
 parseSegment = do
@@ -44,9 +41,6 @@ parseSegment = do
   ; q <- parseVertex
   ; return (p,q)
   }
-
-numbering :: Int -> [a] -> [(Int,a)]
-numbering n = zip [n..]
 
 sample :: String
 sample = unlines
@@ -63,4 +57,20 @@ sample = unlines
   ,"0,1 1,1"
   ]
 
+valid :: Show a => a -> IO Bool
+valid n = do
+  q <- readFile ("problems/"++show n++".dat")
+  p <- return $ head $ fst <$> readP_to_S parseProblem q
+  return (q == show p)
 
+-- |
+-- >>> validAll
+-- True
+validAll :: IO Bool
+validAll = return . all (==True) =<< mapM valid [1..101]
+
+loadProblem :: Int -> IO Problem
+loadProblem n = do
+  q <- readFile $ "problems" </> show n <.> "dat"
+  let p = head $ fst <$> readP_to_S parseProblem q
+  return p
