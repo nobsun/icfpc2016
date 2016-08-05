@@ -68,7 +68,7 @@ loadProblem n = do
   let p = head $ fst <$> readP_to_S parseProblem q
   return p
 
--- genSimpleAnswer :: Int -> IO ()
+genSimpleAnswer :: Int -> IO ()
 genSimpleAnswer n = do
   p <- loadProblem n
   let vs = concatMap (map snd.pvertice.snd) $ polygons p
