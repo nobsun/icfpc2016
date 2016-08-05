@@ -1,5 +1,6 @@
 module Problem where
 
+import System.FilePath
 import Text.ParserCombinators.ReadP
 import Vertex
 
@@ -83,3 +84,9 @@ valid n = do
 
 validAll :: IO Bool
 validAll = return . all (==True) =<< mapM valid [1..101]
+
+loadProblem :: Int -> IO Problem
+loadProblem n = do
+  q <- readFile $ "problems" </> show n <.> "dat"
+  let p = head $ fst <$> readP_to_S parseProblem q
+  return p
