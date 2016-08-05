@@ -73,5 +73,9 @@ sampleSolution = unlines
   ,"0,1/2"
   ]
 
+
 moveSol :: Vec -> Solution -> Solution
 moveSol vec sol = sol { moves =  [ moveVert vec v | v <- moves sol ]  }
+
+rotSol :: Rotate -> Solution -> Solution
+rotSol rot sol = sol { moves = [ rotVert rot v | v <- moves sol ] }
