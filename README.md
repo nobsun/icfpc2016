@@ -13,4 +13,5 @@ ICFPC 2016
 - Katsutoshi Itoh
 - Kei Hibino
 - Kensuke Matsuzaki
+- Yasuyuki Ogawa
 - Chikanobu Toyofuku
