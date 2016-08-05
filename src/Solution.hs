@@ -72,3 +72,6 @@ sampleSolution = unlines
   ,"1/2,1/2"
   ,"0,1/2"
   ]
+
+moveSol :: Vec -> Solution -> Solution
+moveSol vec sol = sol { moves =  [ moveVert vec v | v <- moves sol ]  }
