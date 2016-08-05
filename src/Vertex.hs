@@ -6,7 +6,7 @@ import Data.Array
 import Data.Ratio
 import Text.ParserCombinators.ReadP
 
-data Vertex = Vertex { xcoord, ycoord :: Rational } deriving (Eq)
+data Vertex = Vertex { xcoord, ycoord :: Rational } deriving (Eq, Ord)
 
 instance Show Vertex where
   show p = showRational (xcoord p) ++ "," ++ showRational (ycoord p)
