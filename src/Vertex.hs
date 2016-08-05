@@ -48,3 +48,18 @@ type Vec = (Rational,Rational)
 
 moveVert :: Vec -> Vertex -> Vertex
 moveVert (dx,dy) (Vertex x y) = Vertex (x+dx) (y+dy)
+
+
+data Rotate
+  = RotLeft
+  | RotRight
+
+rotVert :: Rotate -> Vertex -> Vertex
+rotVert RotLeft  = rotLeftVert
+rotVert RotRight = rotRightVert
+
+rotLeftVert :: Vertex -> Vertex
+rotLeftVert  (Vertex x y) = Vertex y (-x)
+
+rotRightVert :: Vertex -> Vertex
+rotRightVert (Vertex x y) = Vertex (-y) x
