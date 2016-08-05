@@ -63,6 +63,9 @@ valid n = do
   p <- return $ head $ fst <$> readP_to_S parseProblem q
   return (q == show p)
 
+-- |
+-- >>> validAll
+-- True
 validAll :: IO Bool
 validAll = return . all (==True) =<< mapM valid [1..101]
 
