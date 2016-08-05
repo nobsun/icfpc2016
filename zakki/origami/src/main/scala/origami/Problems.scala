@@ -9,12 +9,17 @@ import java.awt.Color
 import java.awt.Graphics2D
 import javax.imageio.ImageIO
 import java.io.File
+import java.util.regex.Pattern.Dot
+import spire.math.RationalNumber
 
 case class Vertex(x: Rational, y: Rational) {
   def this(x: Int, y: Int) = this(Rational(x), Rational(y))
 
   def +(v: Vertex): Vertex = Vertex(x + v.x, y + v.y)
+  def -(v: Vertex): Vertex = Vertex(x - v.x, y - v.y)
+  def *(s: Rational): Vertex = Vertex(x * s, y * s)
   def /(s: Rational): Vertex = Vertex(x / s, y / s)
+  def dot(v: Vertex): Rational = x * v.x + y * v.y
 
   def toShortString() = x + "," + y
 }
@@ -24,6 +29,14 @@ case class Edge(a: Vertex, b: Vertex) {
   def equals(pa: Vertex, pb: Vertex): Boolean = {
     (a == pa && b == pb) || (a == pb && b == pa)
   }
+  override def equals(o: Any): Boolean = {
+    o match {
+      case e: Edge => equals(e.a, e.b)
+      case _       => false
+    }
+
+  }
+  override def hashCode(): Int = a.hashCode() ^ b.hashCode()
 }
 
 case class Facet(vertices: Vector[Vertex])
@@ -168,6 +181,46 @@ object Util {
       next(e, Set(e), List(e.b, e.a))
     }
     facets.values.toVector
+  }
+
+  case class Transform(o: Vertex, ax: Vertex, ay: Vertex,
+                   o1: Vertex, ax1: Vertex, ay1: Vertex, s: Rational) {
+    def transform(p: Vertex): Vertex = {
+      val p0 = p - o
+      val x = p0.dot(ax)
+      val y = p0.dot(ay)
+      (ax1 * x + ay1 * y + o1) / s
+    }
+  }
+
+  def createTrans(from: Edge, to: Edge): Transform = {
+    val ax = from.b - from.a
+    val ay = Vertex(ax.y, -ax.x)
+    val ax1 = to.b - to.a
+    val ay1 = Vertex(ax1.y, -ax1.x)
+    val l2 = ax dot ax
+    Transform(from.a, ax, ay, to.a, ax1, ay1, l2)
+  }
+
+  def transform(from: Edge, to: Edge, p: Vertex): Vertex = {
+    createTrans(from, to).transform(p)
+  }
+
+  def _transform(from: Edge, to: Edge, p: Vertex): Vertex = {
+    //val ox = to.a.x - from.a.x
+    //val oy = to.a.y - from.a.y
+    val p0 = p - from.a
+    val ax = from.b - from.a
+    val ay = Vertex(ax.y, -ax.x)
+    val x = p0.dot(ax)
+    val y = p0.dot(ay)
+
+    val ax1 = to.b - to.a
+    val ay1 = Vertex(ax1.y, -ax1.x)
+
+    val l2 = ax dot ax
+
+    (ax1 * x + ay1 * y + to.a) / l2
   }
 }
 
