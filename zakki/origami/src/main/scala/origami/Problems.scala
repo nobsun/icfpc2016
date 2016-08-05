@@ -15,6 +15,8 @@ case class Vertex(x: Rational, y: Rational) {
 
   def +(v: Vertex): Vertex = Vertex(x + v.x, y + v.y)
   def /(s: Rational): Vertex = Vertex(x / s, y / s)
+
+  def toShortString() = x + "," + y
 }
 
 case class Polygon(vertices: Vector[Vertex])
@@ -91,7 +93,7 @@ object Visualizer {
 
   def drawImage(p: Problem) = {
     val size = 500
-    val pad = 10
+    val pad = 40
     val (minX, minY, maxX, maxY) = Util.areaOf(p)
     val w_ = maxX - minX
     val h_ = maxY - minY
@@ -99,20 +101,23 @@ object Visualizer {
     val w = l
     val h = l
     val path = new GeneralPath(Path2D.WIND_EVEN_ODD)
-    
+
     val img = new BufferedImage(size, size, BufferedImage.TYPE_3BYTE_BGR)
     val g = img.getGraphics().asInstanceOf[Graphics2D]
     g.setColor(Color.WHITE)
     g.fillRect(0, 0, size, size)
-    
+
     g.setColor(Color.RED)
     g.drawLine(0, 0, size, size)
+
+    def getx(x: Rational) = ((x - minX) / w).toDouble * (size - pad * 2) + pad
+    def gety(y: Rational) = ((maxY - y) / h).toDouble * (size - pad * 2) + pad
 
     for (poly <- p.polygon) {
       var start = true
       for (v <- poly.vertices) {
-        val x = ((v.x - minX) / w).toDouble * (size - pad * 2) + pad
-        val y = ((v.y - minY) / h).toDouble * (size - pad * 2) + pad
+        val x = getx(v.x)
+        val y = gety(v.y)
         if (start) {
           path.moveTo(x, y)
           start = false
@@ -125,14 +130,26 @@ object Visualizer {
     g.setColor(Color.LIGHT_GRAY)
     g.fill(path)
 
-    g.setColor(Color.BLACK)
     for (e <- p.edges) {
-      val x1 = ((e.a.x - minX) / w).toDouble * (size - pad * 2) + pad
-      val y1 = ((e.a.y - minY) / h).toDouble * (size - pad * 2) + pad
-      val x2 = ((e.b.x - minX) / w).toDouble * (size - pad * 2) + pad
-      val y2 = ((e.b.y - minY) / h).toDouble * (size - pad * 2) + pad
+      val x1 = getx(e.a.x)
+      val y1 = gety(e.a.y)
+      val x2 = getx(e.b.x)
+      val y2 = gety(e.b.y)
+      g.setColor(Color.BLACK)
       g.drawLine(x1.toInt, y1.toInt, x2.toInt, y2.toInt)
+
+      g.setColor(Color.CYAN.darker())
+      g.drawString(e.a.toShortString(), x1.toInt - 10, y1.toInt + 5)
+      g.drawString(e.b.toShortString(), x2.toInt - 10, y2.toInt + 5)
     }
+
+    for (poly <- p.polygon; v <- poly.vertices) {
+      val x = getx(v.x)
+      val y = gety(v.y)
+      g.setColor(Color.GREEN.darker())
+      g.drawString(v.toShortString(), x.toInt - 10, y.toInt + 5)
+    }
+
     g.dispose()
     img
   }
