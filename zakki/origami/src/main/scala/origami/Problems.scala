@@ -11,6 +11,7 @@ import javax.imageio.ImageIO
 import java.io.File
 import java.util.regex.Pattern.Dot
 import spire.math.RationalNumber
+import spire.math.RationalNumber
 
 case class Vertex(x: Rational, y: Rational) {
   def this(x: Int, y: Int) = this(Rational(x), Rational(y))
@@ -88,19 +89,40 @@ class Reader(lines: Array[String]) {
   }
 }
 
+class RArea(x: Rational, y: Rational) {
+  var minX: Rational = x
+  var maxX: Rational = x
+  var minY: Rational = y
+  var maxY: Rational = y
+
+  def this(v: Vertex) {
+    this(v.x, v.y)
+  }
+
+  def this(vs: Seq[Vertex]) {
+    this(vs(0).x, vs(0).y)
+    for (v <- vs)
+      update(v)
+  }
+
+  def width = maxX - minX
+  def height = maxY - minY
+
+  def update(v: Vertex): Unit = {
+    if (minX > v.x) minX = v.x
+    if (maxX < v.x) maxX = v.x
+    if (minY > v.y) minY = v.y
+    if (maxY < v.y) maxY = v.y
+  }
+}
+
 object Util {
   def areaOf(p: Problem): (Rational, Rational, Rational, Rational) = {
-    var minX = p.polygon(0).vertices(0).x
-    var maxX = p.polygon(0).vertices(0).x
-    var minY = p.polygon(0).vertices(0).y
-    var maxY = p.polygon(0).vertices(0).y
+    val area = new RArea(p.polygon(0).vertices(0))
     for (poly <- p.polygon; v <- poly.vertices) {
-      if (minX > v.x) minX = v.x
-      if (maxX < v.x) maxX = v.x
-      if (minY > v.y) minY = v.y
-      if (maxY < v.y) maxY = v.y
+      area.update(v)
     }
-    (minX, minY, maxX, maxY)
+    (area.minX, area.minY, area.maxX, area.maxY)
   }
 
   def isInner(v: Vertex, polygon: Vector[Vertex]) = {
@@ -183,8 +205,51 @@ object Util {
     facets.values.toVector
   }
 
+  def isSquareLike(vs: Seq[Vertex]): Boolean = {
+    val v0 :: v1 :: _ = vs
+    //ignore scale
+    val t = createTrans(Edge(v0, v1),
+      Edge(Vertex(Rational(0), Rational(0)), Vertex(Rational(1), Rational(0))))
+    val vs1 = vs.map(v => t.transform(v))
+    val a = new RArea(vs1)
+    if (a.width != a.height) {
+      //println(a)
+      return false
+    }
+    if (!vs1.exists(p => p.x == a.minX && p.y == a.minY)) {
+      //println(vs1)
+      //println("no minmin " + a.minX + ", " + a.minY)
+      return false
+    }
+    if (!vs1.exists(p => p.x == a.maxX && p.y == a.minY)) {
+      //println(vs1)
+      //println("no maxmin " + a.maxX + ", " + a.minY)
+      return false
+    }
+    if (!vs1.exists(p => p.x == a.minX && p.y == a.maxY)) {
+      //println(vs1)
+      //println("no minmax " + a.minX + ", " + a.maxY)
+      return false
+    }
+    if (!vs1.exists(p => p.x == a.maxX && p.y == a.maxY)) {
+      //println(vs1)
+      //println("no maxmax " + a.maxX + ", " + a.maxY)
+      return false
+    }
+    return true
+  }
+
+  def isSquare(fs: List[Facet]): Boolean = {
+    val vs = fs.flatMap { f => f.vertices }.sortBy { _.x }
+    if (vs.length < 4)
+      return false
+    if (!isSquareLike(vs))
+      return false
+    true
+  }
+
   case class Transform(o: Vertex, ax: Vertex, ay: Vertex,
-                   o1: Vertex, ax1: Vertex, ay1: Vertex, s: Rational) {
+                       o1: Vertex, ax1: Vertex, ay1: Vertex, s: Rational) {
     def transform(p: Vertex): Vertex = {
       val p0 = p - o
       val x = p0.dot(ax)
@@ -209,16 +274,16 @@ object Util {
   def _transform(from: Edge, to: Edge, p: Vertex): Vertex = {
     //val ox = to.a.x - from.a.x
     //val oy = to.a.y - from.a.y
-    val p0 = p - from.a
+    val p0 = p - from.a // / |ax|
     val ax = from.b - from.a
     val ay = Vertex(ax.y, -ax.x)
     val x = p0.dot(ax)
     val y = p0.dot(ay)
 
-    val ax1 = to.b - to.a
+    val ax1 = to.b - to.a // / |ax1|
     val ay1 = Vertex(ax1.y, -ax1.x)
 
-    val l2 = ax dot ax
+    val l2 = ax dot ax // |ax1| / |ax1|
 
     (ax1 * x + ay1 * y + to.a) / l2
   }
