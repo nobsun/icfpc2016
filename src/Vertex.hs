@@ -37,3 +37,5 @@ parseRational = skipSpaces >> do
 parseInteger :: ReadP Integer
 parseInteger = skipSpaces >> readS_to_P (Prelude.readsPrec 0)
 
+distance :: Floating f => (Vertex, Vertex) -> f
+distance (v1, v2) = sqrt $ fromRational $ (xcoord v1 - xcoord v2)^2 + (ycoord v1 - ycoord v2)^2
