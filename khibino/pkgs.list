@@ -2,3 +2,7 @@ haskell-stack
 jq
 ghc-mod
 ghc-mod-el
+curl
+git
+mercurial
+mercurial-git
