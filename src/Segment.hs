@@ -1,6 +1,8 @@
 module Segment where
 
+import Text.ParserCombinators.ReadP
 import Vertex
+
 
 type Segment = (Vertex, Vertex)
 
