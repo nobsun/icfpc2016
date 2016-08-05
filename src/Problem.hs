@@ -3,6 +3,7 @@ module Problem where
 import System.FilePath
 import Text.ParserCombinators.ReadP
 import Polygon
+import Segment
 import Vertex
 
 data Problem = Problem
@@ -12,15 +13,10 @@ data Problem = Problem
   , segments :: [Segment]
   }
 
-type Segment = (Vertex, Vertex)
-
 instance Show Problem where
   show p = unlines
          $  show (nPolygon p) : map (show . snd) (polygons p)
          ++ show (nSegment p) : map showSegment (segments p)
-
-showSegment :: Segment -> String
-showSegment (p,q) = unwords [show p, show q]
 
 instance Read Problem where
   readsPrec _ = readP_to_S parseProblem 
@@ -33,13 +29,6 @@ parseProblem = do
   ; ss <- count ns parseSegment
   ; char '\n'
   ; return (Problem np (numbering 0 ps) ns ss)
-  }
-
-parseSegment :: ReadP Segment
-parseSegment = do
-  { p <- parseVertex
-  ; q <- parseVertex
-  ; return (p,q)
   }
 
 sample :: String
