@@ -4,6 +4,7 @@ import spire.implicits._
 import spire.math._
 import scala.collection.immutable.Vector
 import java.io.File
+import origami.math._
 
 object Fold {
   def fold(src: Vertex, dst: Vertex, pt: Vertex): Vertex = {

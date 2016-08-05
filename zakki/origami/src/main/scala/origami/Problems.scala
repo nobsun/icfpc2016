@@ -10,20 +10,7 @@ import java.awt.Graphics2D
 import javax.imageio.ImageIO
 import java.io.File
 import java.util.regex.Pattern.Dot
-import spire.math.RationalNumber
-import spire.math.RationalNumber
-
-case class Vertex(x: Rational, y: Rational) {
-  def this(x: Int, y: Int) = this(Rational(x), Rational(y))
-
-  def +(v: Vertex): Vertex = Vertex(x + v.x, y + v.y)
-  def -(v: Vertex): Vertex = Vertex(x - v.x, y - v.y)
-  def *(s: Rational): Vertex = Vertex(x * s, y * s)
-  def /(s: Rational): Vertex = Vertex(x / s, y / s)
-  def dot(v: Vertex): Rational = x * v.x + y * v.y
-
-  def toShortString() = x + "," + y
-}
+import origami.math._
 
 case class Polygon(vertices: Vector[Vertex])
 case class Edge(a: Vertex, b: Vertex) {
@@ -89,36 +76,11 @@ class Reader(lines: Array[String]) {
   }
 }
 
-class RArea(x: Rational, y: Rational) {
-  var minX: Rational = x
-  var maxX: Rational = x
-  var minY: Rational = y
-  var maxY: Rational = y
-
-  def this(v: Vertex) {
-    this(v.x, v.y)
-  }
-
-  def this(vs: Seq[Vertex]) {
-    this(vs(0).x, vs(0).y)
-    for (v <- vs)
-      update(v)
-  }
-
-  def width = maxX - minX
-  def height = maxY - minY
-
-  def update(v: Vertex): Unit = {
-    if (minX > v.x) minX = v.x
-    if (maxX < v.x) maxX = v.x
-    if (minY > v.y) minY = v.y
-    if (maxY < v.y) maxY = v.y
-  }
-}
 
 object Util {
   def areaOf(p: Problem): (Rational, Rational, Rational, Rational) = {
     val area = new RArea(p.polygon(0).vertices(0))
+
     for (poly <- p.polygon; v <- poly.vertices) {
       area.update(v)
     }

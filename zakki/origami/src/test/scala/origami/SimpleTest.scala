@@ -5,7 +5,8 @@ import org.junit.Assert._
 
 import spire.implicits._
 import spire.math._
-import sun.security.provider.certpath.Vertex
+
+import origami.math._
 
 class SimpleTest {
 
