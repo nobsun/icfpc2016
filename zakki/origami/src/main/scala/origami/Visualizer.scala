@@ -61,6 +61,15 @@ object Visualizer {
     g.setColor(Color.LIGHT_GRAY)
     g.fill(path)
 
+    g.setColor(Color.BLACK)
+    for (poly <- p.polygon) {
+      for ((v, i) <- poly.vertices.zipWithIndex) {
+        val x = getx(v.x)
+        val y = gety(v.y) + pad / 2
+        g.drawString(('a' + i).toChar.toString, x, y)
+      }
+    }
+
     for (e <- p.edges) {
       val x1 = getx(e.a.x)
       val y1 = gety(e.a.y)
@@ -145,12 +154,12 @@ object Visualizer {
     g.setColor(Color.BLACK)
     g.draw(path)
 
-//    for (poly <- p.polygon; v <- poly.vertices) {
-//      val x = getx(v.x)
-//      val y = gety(v.y)
-//      g.setColor(Color.GREEN.darker())
-//      g.drawString(v.toShortString(), x.toInt - 10, y.toInt + 5)
-//    }
+    //    for (poly <- p.polygon; v <- poly.vertices) {
+    //      val x = getx(v.x)
+    //      val y = gety(v.y)
+    //      g.setColor(Color.GREEN.darker())
+    //      g.drawString(v.toShortString(), x.toInt - 10, y.toInt + 5)
+    //    }
 
     g.dispose()
     img
