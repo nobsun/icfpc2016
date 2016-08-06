@@ -94,12 +94,3 @@ moveRotSol :: Int -> Vec -> Rotate -> PyTri -> Pythagoras -> FilePath -> IO ()
 moveRotSol n vec rot tri py fn = do
   sol <- moveSol vec . rotSol rot tri py <$> loadSolution n
   writeFile fn $ show sol
-
--- _xx :: IO ()
--- _xx = mrSol 42 (22198364333 % 76542960639, (-130973206238) % 1148144409585) (Just RotLeft) "xx.dat"
-
--- _yy :: IO ()
--- _yy = mrSol 42 (0,0) (Just RotLeft) "yy.dat"
-
--- _zz :: IO ()
--- _zz = mrSol 42 (22198364333 % 76542960639, (-130973206238) % 1148144409585) Nothing "zz.dat"
