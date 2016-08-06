@@ -2,7 +2,6 @@
 import Text.Read (readMaybe)
 import System.Environment
 
-import Vertex
 import Rotate
 import Solution
 
