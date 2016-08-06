@@ -21,6 +21,7 @@ library
                      , Problem
                      , Solution
                      , Valid
+                     , Rotate
 
                      , REST.Response
 
