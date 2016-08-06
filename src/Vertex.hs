@@ -42,3 +42,24 @@ distance = sqrt . fromRational . sqDistance
 
 sqDistance :: (Vertex, Vertex) -> Rational
 sqDistance (v1, v2) = (xcoord v1 - xcoord v2)^2 + (ycoord v1 - ycoord v2)^2
+
+
+type Vec = (Rational,Rational)
+
+moveVert :: Vec -> Vertex -> Vertex
+moveVert (dx,dy) (Vertex x y) = Vertex (x+dx) (y+dy)
+
+
+data Rotate
+  = RotLeft
+  | RotRight
+
+rotVert :: Rotate -> Vertex -> Vertex
+rotVert RotLeft  = rotLeftVert
+rotVert RotRight = rotRightVert
+
+rotLeftVert :: Vertex -> Vertex
+rotLeftVert  (Vertex x y) = Vertex y (-x)
+
+rotRightVert :: Vertex -> Vertex
+rotRightVert (Vertex x y) = Vertex (-y) x

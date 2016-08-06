@@ -1,20 +1,28 @@
-#!/bin/sh -x
+#!/bin/sh
+
+bsleep=$1
+
+[ x"$bsleep" != x ] || bsleep=4
+
+[ x"$(expr $bsleep '>=' 1)" = x1 ] || bsleep=1
+
+set -x
+
 # CLEAN
-rm snapshots.json bloblookup.json
+rm -f snapshots.json bloblookup.json
 
 # GET Snapshot
 curl --compressed -L -H Expect: -H 'X-API-Key: 49-99eab0ca16efde61012b3a535bab0edb' 'http://2016sv.icfpcontest.org/api/snapshot/list' > snapshots.json
 
-sleep 5
+sleep 1
 
 # GET Blob Lookup
 cat snapshots.json |jq -r '.snapshots | sort_by(.snapshot_time) | .[-1].snapshot_hash' | sed "s@\(.*\)@curl --compressed -L -H Expect: -H \'X-API-Key: 49-99eab0ca16efde61012b3a535bab0edb\' \'http://2016sv.icfpcontest.org/api/blob/\1\' \> bloblookup.json@" | sh
 
-sleep 5
+sleep $bsleep
 
 # GEN Script
-cat bloblookup.json |jq -rc '.problems[] | [.problem_id, .problem_spec_hash] | @csv' | sed 's@\(.*\),\"\(.*\)\"@echo NOW DOWNLOADING ... \1; curl --compressed -L -H Expect: -H \"X-API-Key: 49-99eab0ca16efde61012b3a535bab0edb\" \"http://2016sv.icfpcontest.org/api/blob/\2\" \> problems/\1.dat; sleep 4@' > do.sh
+cat bloblookup.json |jq -rc '.problems[] | [.problem_id, .problem_spec_hash] | @csv' | sed 's@\(.*\),\"\(.*\)\"@if [ -r problems/\1.dat ]; then echo EXISTS SKIP \1 ; else echo NOW DOWNLOADING ... \1 ; curl --compressed -L -H Expect: -H \"X-API-Key: 49-99eab0ca16efde61012b3a535bab0edb\" \"http://2016sv.icfpcontest.org/api/blob/\2\" \> problems/\1.dat; sleep '$bsleep'; fi@' > do.sh
 
 # Download
 sh do.sh
-

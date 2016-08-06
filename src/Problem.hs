@@ -1,7 +1,6 @@
 module Problem where
 
-
-
+import Control.Arrow
 import GHC.Real
 
 import System.FilePath
@@ -23,7 +22,7 @@ instance Show Problem where
          ++ show (nSegment p) : map showSegment (segments p)
 
 instance Read Problem where
-  readsPrec _ = readP_to_S parseProblem 
+  readsPrec _ = readP_to_S parseProblem
 
 parseProblem :: ReadP Problem
 parseProblem = do
@@ -80,3 +79,24 @@ genSimpleAnswer n = do
     mv (dx, dy) (x, y) = (x+dx, y+dy)
     showR r = show (numerator r) ++ "/" ++ show (denominator r)
     showT (x, y) = showR x ++ "," ++ showR y
+
+
+moveVertex :: Vec -> Vertex -> Vertex
+moveVertex (dx, dy) (Vertex x y) = (Vertex (x + dx) (y + dy))
+
+moveSegment :: Vec -> Segment -> Segment
+moveSegment v (dom, codom) = (moveVertex v dom, moveVertex v codom)
+
+moveProb :: Vec -> Problem -> Problem
+moveProb vec (Problem npoly polys nseg segs)
+  = Problem npoly polys' nseg segs'
+    where
+      segs' = map (moveSeg vec) segs
+      polys' = map (second (movePoly vec)) polys
+
+moveSeg :: Vec -> Segment -> Segment
+moveSeg vec (v1,v2) = (moveVert vec v1, moveVert vec v2)
+
+movePoly :: Vec -> Polygon -> Polygon
+movePoly vec (Polygon nv vs)
+  = Polygon nv (map (second (moveVertex vec)) vs)
