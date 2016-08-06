@@ -40,6 +40,10 @@ parseInteger = skipSpaces >> readS_to_P (Prelude.readsPrec 0)
 distance :: Floating f => (Vertex, Vertex) -> f
 distance = sqrt . fromRational . sqDistance
 
+distance' :: Integral a => (Vertex, Vertex) -> Ratio a
+distance' (v1, v2) = let x = sqDistance (v1, v2)
+                     in (floor (sqrt (fromInteger (numerator x)))) % (floor (sqrt (fromInteger (denominator x))))
+
 sqDistance :: (Vertex, Vertex) -> Rational
 sqDistance (v1, v2) = (xcoord v1 - xcoord v2)^2 + (ycoord v1 - ycoord v2)^2
 
