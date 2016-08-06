@@ -93,11 +93,11 @@ mrSol n vec rot fn = do
   sol <- moveSol vec . maybe id rotSol rot <$> loadSolution n
   writeFile fn $ show sol
 
--- _xx :: IO ()
--- _xx = mrSol 42 (22198364333 % 76542960639, (-130973206238) % 1148144409585) (Just RotLeft) "xx.dat"
+_xx :: IO ()
+_xx = mrSol 42 (22198364333 % 76542960639, (-130973206238) % 1148144409585) (Just RotLeft) "xx.dat"
 
--- _yy :: IO ()
--- _yy = mrSol 42 (0,0) (Just RotLeft) "yy.dat"
+_yy :: IO ()
+_yy = mrSol 42 (0,0) (Just RotLeft) "yy.dat"
 
 _zz :: IO ()
 _zz = mrSol 42 (22198364333 % 76542960639, (-130973206238) % 1148144409585) Nothing "zz.dat"
