@@ -1,16 +1,16 @@
 module Solution where
 
-import Data.Ord (comparing)
-import Data.List (group,sort)
-import Data.Function (on)
-import Data.Ratio
+-- import Data.Ord (comparing)
+-- import Data.List (group,sort)
+-- import Data.Function (on)
+-- import Data.Ratio
 import Data.Maybe
 import Text.ParserCombinators.ReadP
 import System.FilePath
 import Vertex
-import Segment
+-- import Segment
 import Polygon
-import Problem
+-- import Problem
 import Rotate
 
 data Solution = Solution
