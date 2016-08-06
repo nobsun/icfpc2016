@@ -17,5 +17,4 @@ parseSegment = do
   }
 
 segLength2 :: Segment -> Rational
-segLength2 (p,q) = (xcoord p - xcoord q)^2 + (ycoord p - ycoord q)^2
-
+segLength2 (p,q) = (xcoord p - xcoord q)^(2 :: Int) + (ycoord p - ycoord q)^(2 :: Int)

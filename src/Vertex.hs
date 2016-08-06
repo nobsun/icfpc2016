@@ -42,10 +42,10 @@ distance = sqrt . fromRational . sqDistance
 
 distance' :: Integral a => (Vertex, Vertex) -> Ratio a
 distance' (v1, v2) = let x = sqDistance (v1, v2)
-                     in (floor (sqrt (fromInteger (numerator x)))) % (floor (sqrt (fromInteger (denominator x))))
+                     in (floor (sqrt (fromInteger (numerator x) :: Double))) % (floor (sqrt (fromInteger (denominator x) :: Double)))
 
 sqDistance :: (Vertex, Vertex) -> Rational
-sqDistance (v1, v2) = (xcoord v1 - xcoord v2)^2 + (ycoord v1 - ycoord v2)^2
+sqDistance (v1, v2) = (xcoord v1 - xcoord v2)^(2 :: Int) + (ycoord v1 - ycoord v2)^(2 :: Int)
 
 
 type Vec = (Rational,Rational)
