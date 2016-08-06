@@ -30,4 +30,4 @@ main = do
       <*> pure fn
     _                            ->
       clError
-  mrSol n (x, y) rot tri py fn
+  moveRotSol n (x, y) rot tri py fn

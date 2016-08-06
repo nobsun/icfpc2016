@@ -90,8 +90,8 @@ moveSol vec sol = sol { moves =  [ moveVert vec v | v <- moves sol ]  }
 rotSol :: Rotate -> PyTri -> Pythagoras -> Solution -> Solution
 rotSol rot tri py sol = sol { moves = [ rotVert rot tri py v | v <- moves sol ] }
 
-mrSol :: Int -> Vec -> Rotate -> PyTri -> Pythagoras -> FilePath -> IO ()
-mrSol n vec rot tri py fn = do
+moveRotSol :: Int -> Vec -> Rotate -> PyTri -> Pythagoras -> FilePath -> IO ()
+moveRotSol n vec rot tri py fn = do
   sol <- moveSol vec . rotSol rot tri py <$> loadSolution n
   writeFile fn $ show sol
 
