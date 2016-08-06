@@ -1,8 +1,8 @@
 module Vertex where
 
 
+import Control.Monad
 import Data.Bool
-
 import Data.Ratio
 import Text.ParserCombinators.ReadP
 
@@ -21,7 +21,7 @@ instance Read Vertex where
 parseVertex :: ReadP Vertex
 parseVertex = do
   { x <- parseRational
-  ; char ','
+  ; void $ char ','
   ; y <- parseRational
   ; return (Vertex x y)
   }
