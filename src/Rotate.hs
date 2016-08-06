@@ -53,7 +53,7 @@ pySin' (Pythagoras (_, b, c)) = b % c
 data PyTri
   = TriLex
   | TriFlip
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord, Show, Read)
 
 pyCos :: PyTri -> Pythagoras -> Rational
 pyCos TriLex   = pyCos'
@@ -66,7 +66,7 @@ pySin TriFlip  = pyCos'
 data Rotate
   = CounterClock
   | Clock
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord, Show, Read)
 
 rotVert :: Rotate
         -> PyTri
@@ -81,3 +81,21 @@ rotVert rot tri py v = case rot of
     y = ycoord v
     cos' = pyCos tri py
     sin' = pySin tri py
+
+rotLeftVert :: Vertex -> Vertex
+rotLeftVert = rotVert CounterClock TriLex (Pythagoras (0, 1, 1))
+
+rotRightVert :: Vertex -> Vertex
+rotRightVert = rotVert Clock       TriLex (Pythagoras (0, 1, 1))
+
+_t_left :: (Vertex, Vertex, Vertex)
+_t_left =
+  (rotLeftVert $ Vertex 1 0,
+   rotLeftVert $ Vertex 0 1,
+   rotLeftVert $ Vertex 1 1)
+
+_t_right :: (Vertex, Vertex, Vertex)
+_t_right =
+  (rotRightVert $ Vertex 1 0,
+   rotRightVert $ Vertex 0 1,
+   rotRightVert $ Vertex 1 1)

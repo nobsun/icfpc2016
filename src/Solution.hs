@@ -11,6 +11,7 @@ import Vertex
 import Segment
 import Polygon
 import Problem
+import Rotate
 
 data Solution = Solution
   { snVertex  :: Int
@@ -86,19 +87,19 @@ loadSolution n = do
 moveSol :: Vec -> Solution -> Solution
 moveSol vec sol = sol { moves =  [ moveVert vec v | v <- moves sol ]  }
 
-rotSol :: Rotate -> Solution -> Solution
-rotSol rot sol = sol { moves = [ rotVert rot v | v <- moves sol ] }
+rotSol :: Rotate -> PyTri -> Pythagoras -> Solution -> Solution
+rotSol rot tri py sol = sol { moves = [ rotVert rot tri py v | v <- moves sol ] }
 
-mrSol :: Int -> Vec -> Maybe Rotate -> FilePath -> IO ()
-mrSol n vec rot fn = do
-  sol <- moveSol vec . maybe id rotSol rot <$> loadSolution n
+mrSol :: Int -> Vec -> Rotate -> PyTri -> Pythagoras -> FilePath -> IO ()
+mrSol n vec rot tri py fn = do
+  sol <- moveSol vec . rotSol rot tri py <$> loadSolution n
   writeFile fn $ show sol
 
-_xx :: IO ()
-_xx = mrSol 42 (22198364333 % 76542960639, (-130973206238) % 1148144409585) (Just RotLeft) "xx.dat"
+-- _xx :: IO ()
+-- _xx = mrSol 42 (22198364333 % 76542960639, (-130973206238) % 1148144409585) (Just RotLeft) "xx.dat"
 
-_yy :: IO ()
-_yy = mrSol 42 (0,0) (Just RotLeft) "yy.dat"
+-- _yy :: IO ()
+-- _yy = mrSol 42 (0,0) (Just RotLeft) "yy.dat"
 
-_zz :: IO ()
-_zz = mrSol 42 (22198364333 % 76542960639, (-130973206238) % 1148144409585) Nothing "zz.dat"
+-- _zz :: IO ()
+-- _zz = mrSol 42 (22198364333 % 76542960639, (-130973206238) % 1148144409585) Nothing "zz.dat"
