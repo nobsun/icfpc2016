@@ -42,8 +42,8 @@ object Visualizer {
     g.setColor(Color.RED)
     g.drawLine(0, 0, size, size)
 
-    def getx(x: Rational) = ((x - minX) / w).toDouble * (size - pad * 2) + pad
-    def gety(y: Rational) = ((maxY - y) / h).toDouble * (size - pad * 2) + pad
+    def getx(x: Rational) = ((x - minX) / w * (size - pad * 2)).toInt + pad
+    def gety(y: Rational) = ((maxY - y) / h * (size - pad * 2)).toInt + pad
 
     for (poly <- p.polygon) {
       var start = true
@@ -102,11 +102,11 @@ object Visualizer {
     g.setColor(Color.RED)
     g.drawLine(0, 0, size, size)
 
-    def getsx(x: Rational) = ((x - srcArea.minX) / l).toDouble * (size - pad * 2) + pad
-    def getsy(y: Rational) = ((srcArea.maxY - y) / l).toDouble * (size - pad * 2) + pad
+    def getsx(x: Rational) = ((x - srcArea.minX) / l * (size - pad * 2)).toInt + pad
+    def getsy(y: Rational) = ((srcArea.maxY - y) / l * (size - pad * 2)).toInt + pad
 
-    def getdx(x: Rational) = size + ((x - dstArea.minX) / l).toDouble * (size - pad * 2) + pad
-    def getdy(y: Rational) = ((dstArea.maxY - y) / l).toDouble * (size - pad * 2) + pad
+    def getdx(x: Rational) = size + ((x - dstArea.minX) / l * (size - pad * 2)).toInt + pad
+    def getdy(y: Rational) = ((dstArea.maxY - y) / l * (size - pad * 2)).toInt + pad
 
     for (f <- p.facets) {
       var start = true
