@@ -3,6 +3,7 @@ module Problem where
 import Control.Arrow
 import GHC.Real
 
+import System.Directory
 import System.FilePath
 import Text.ParserCombinators.ReadP
 import Polygon
@@ -69,12 +70,16 @@ loadProblem n = do
 
 genSimpleAnswer :: Int -> IO ()
 genSimpleAnswer n = do
-  p <- loadProblem n
-  let vs = concatMap (map snd.pvertice.snd) $ polygons p
-      (dx, dy) = (minimum $ map xcoord vs, minimum $ map ycoord vs)
-      vs' = map (mv (dx, dy)) [(0,0), (1,0), (1,1), (0,1)]
-      ans = ["4", "0,0", "1,0", "1,1", "0,1", "1", "4 0 1 2 3"] ++ map showT vs'
-  writeFile ("answers/"++show n++".dat") $ unlines ans
+  b <- doesFileExist $ "problems" </> show n <.> "dat"
+  if b
+    then do
+    p <- loadProblem n
+    let vs = concatMap (map snd.pvertice.snd) $ polygons p
+        (dx, dy) = (minimum $ map xcoord vs, minimum $ map ycoord vs)
+        vs' = map (mv (dx, dy)) [(0,0), (1,0), (1,1), (0,1)]
+        ans = ["4", "0,0", "1,0", "1,1", "0,1", "1", "4 0 1 2 3"] ++ map showT vs'
+    writeFile ("answers/"++show n++".dat") $ unlines ans
+    else return ()
   where
     mv (dx, dy) (x, y) = (x+dx, y+dy)
     showR r = show (numerator r) ++ "/" ++ show (denominator r)
