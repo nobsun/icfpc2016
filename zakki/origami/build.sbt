@@ -10,6 +10,9 @@ scalaVersion := "2.11.7"
 libraryDependencies ++= Seq(
     "org.scalatest"   %% "scalatest"    % "2.2.4"   % "test"
 )
+import AssemblyKeys._ // put this at the top of the file
+
+assemblySettings
 
 // For Settings/Task reference, see http://www.scala-sbt.org/release/sxr/sbt/Keys.scala.html
 

@@ -16,23 +16,43 @@ object Fold {
 import java.nio.file.Files;
 
 object CreateProblemImages extends App {
-  import Fold._
-  println("ok")
-
-  for (f <- new File("../../problems").listFiles() if f.getName().endsWith(".dat")) {
+  def createImage(f: File): Unit = {
     val lines = Files.readAllLines(f.toPath()).toArray(Array[String]())
     val p = new Reader(lines).readProblem
     println(p)
     Visualizer.saveImage(p, f.getAbsolutePath() + ".png")
   }
+
+  for (a <- args) {
+    val f = new File(a)
+    if (f.isFile()) {
+      createImage(f)
+    } else {
+      for (ff <- f.listFiles() if ff.isFile() && ff.getName.endsWith(".dat")) {
+        createImage(ff)
+      }
+    }
+  }
 }
 
 object CreateSolutionImages extends App {
-  for (f <- new File("../../answers").listFiles() if f.getName().endsWith(".dat")) {
+  def createImage(f: File) = {
     val lines = Files.readAllLines(f.toPath()).toArray(Array[String]())
     val s = new Reader(lines).readSolution()
     println(s)
     Visualizer.saveImage(s, f.getAbsolutePath() + ".png")
+  }
+
+  for (a <- args) {
+    val f = new File(a)
+    println(f.getAbsolutePath)
+    if (f.isFile()) {
+      createImage(f)
+    } else {
+      for (ff <- f.listFiles() if (ff.isFile() && ff.getName.endsWith(".dat"))) {
+        createImage(ff)
+      }
+    }
   }
 }
 
