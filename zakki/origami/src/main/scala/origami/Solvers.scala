@@ -12,98 +12,9 @@ import java.io.File
 import java.util.regex.Pattern.Dot
 import origami.math._
 
-case class Polygon(vertices: Vector[Vertex])
-case class Edge(a: Vertex, b: Vertex) {
-  def equals(pa: Vertex, pb: Vertex): Boolean = {
-    (a == pa && b == pb) || (a == pb && b == pa)
-  }
-  override def equals(o: Any): Boolean = {
-    o match {
-      case e: Edge => equals(e.a, e.b)
-      case _       => false
-    }
+case class Facet(vertices: Vector[Vertex])
 
-  }
-  override def hashCode(): Int = a.hashCode() ^ b.hashCode()
-}
-
-case class Problem(polygon: Vector[Polygon], edges: Vector[Edge])
-
-class Reader(lines: Array[String]) {
-  var pos = 0;
-
-  def readLine(): String = {
-    val l = lines(pos)
-    pos += 1
-    l
-  }
-
-  def readIntLine(): Int = readLine().toInt;
-
-  def readVertexLine() = toVertex(readLine())
-  def readEdge() = toEdge(readLine())
-
-  def toVertex(s: String): Vertex = {
-    val tokens = s.split(",")
-    if (tokens.length != 2) throw new IllegalArgumentException()
-    Vertex(Rational(tokens(0)), Rational(tokens(1)))
-  }
-
-  def toEdge(s: String): Edge = {
-    val tokens = s.split(" ")
-    if (tokens.length != 2) throw new IllegalArgumentException()
-    Edge(toVertex(tokens(0)), toVertex(tokens(1)))
-  }
-
-  def readPolygon(): Polygon = {
-    val n = readIntLine()
-    val pts = (for (i <- 0 until n)
-      yield readVertexLine()).toVector
-    Polygon(pts)
-  }
-
-  def readProblem(): Problem = {
-    val n = readIntLine()
-    val polygon = (for (i <- 0 until n)
-      yield readPolygon()).toVector
-    val ne = readIntLine()
-    val edge = (for (i <- 0 until ne)
-      yield readEdge()).toVector
-
-    Problem(polygon, edge)
-  }
-
-  def readFacet(): SFacet = {
-    val tokens = readLine().split(" ")
-    val n = tokens(0).toInt
-    if (tokens.length != n + 1) throw new IllegalArgumentException()
-    val pts = (for (i <- 1 to n)
-      yield tokens(i).toInt).toVector
-    SFacet(pts)
-  }
-
-  def readSolution(): Solution = {
-    val n = readIntLine()
-    val src = (for (i <- 0 until n)
-      yield readVertexLine()).toVector
-    val ne = readIntLine()
-    val facets = (for (i <- 0 until ne)
-      yield readFacet()).toVector
-    val dst = (for (i <- 0 until n)
-      yield readVertexLine()).toVector
-    Solution(src, facets, dst)
-  }
-}
-
-case class SFacet(vertices: Vector[Int])
-
-case class Solution(source: Vector[Vertex],
-                    facets: Vector[SFacet],
-                    destination: Vector[Vertex]) {
-
-}
-
-object Util {
+object Solver {
   def areaOf(p: Problem): (Rational, Rational, Rational, Rational) = {
     val area = new RArea(p.polygon(0).vertices(0))
 
@@ -209,5 +120,4 @@ object Util {
       return false
     true
   }
-
 }
