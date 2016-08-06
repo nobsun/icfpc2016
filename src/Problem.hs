@@ -1,6 +1,7 @@
 module Problem where
 
 import Control.Arrow
+import Data.Maybe
 import GHC.Real
 
 import System.Directory
@@ -65,8 +66,8 @@ validAll = return . all (==True) =<< mapM valid [1..101]
 loadProblem :: Int -> IO Problem
 loadProblem n = do
   q <- readFile $ "problems" </> show n <.> "dat"
-  let p = head $ fst <$> readP_to_S parseProblem q
-  return p
+  maybe (fail "loadProblem: parse error") return
+    $ listToMaybe [ x | (x, "") <- readP_to_S (parseProblem <* skipSpaces) q ]
 
 genSimpleAnswer :: Int -> IO ()
 genSimpleAnswer n = do
