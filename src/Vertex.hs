@@ -29,9 +29,10 @@ parseVertex = do
 parseRational :: ReadP Rational
 parseRational = skipSpaces >> do
   { nd <- sepBy1 parseInteger (char '/')
-  ; return $ case nd of
-               [n]   -> n % 1
-               [n,d] -> n % d
+  ; case nd of
+      [n]   -> return $ n % 1
+      [n,d] -> return $ n % d
+      _     -> mzero
   }
 
 parseInteger :: ReadP Integer
