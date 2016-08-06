@@ -4,6 +4,7 @@ import Data.Ord (comparing)
 import Data.List (group,sort)
 import Data.Function (on)
 import Data.Ratio
+import Data.Maybe
 import Text.ParserCombinators.ReadP
 import System.FilePath
 import Vertex
@@ -79,8 +80,8 @@ sampleSolution = unlines
 loadSolution :: Int -> IO Solution
 loadSolution n = do
   q <- readFile $ "answers" </> show n <.> "dat"
-  let p = head $ fst <$> readP_to_S parseSolution q
-  return p
+  maybe (fail "loadSolution: parse error") return
+    $ listToMaybe [ x | (x, "") <- readP_to_S (parseSolution <* skipSpaces) q ]
 
 moveSol :: Vec -> Solution -> Solution
 moveSol vec sol = sol { moves =  [ moveVert vec v | v <- moves sol ]  }
