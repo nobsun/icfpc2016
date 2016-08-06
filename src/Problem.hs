@@ -62,7 +62,7 @@ valid n = do
 -- >>> validAll
 -- True
 validAll :: IO Bool
-validAll = return . all (==True) =<< mapM valid [1..101]
+validAll = return . all (==True) =<< mapM valid [1..101 :: Int]
 
 loadProblem :: Int -> IO Problem
 loadProblem n = do
