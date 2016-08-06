@@ -25,8 +25,15 @@ object CreateProblemImages extends App {
     println(p)
     Visualizer.saveImage(p, f.getAbsolutePath() + ".png")
   }
+}
 
-  println(fold(Vertex(0, 0), Vertex(0, 1), Vertex(0, 1)))
+object CreateSolutionImages extends App {
+  for (f <- new File("../../answers").listFiles() if f.getName().endsWith(".dat")) {
+    val lines = Files.readAllLines(f.toPath()).toArray(Array[String]())
+    val s = new Reader(lines).readSolution()
+    println(s)
+    Visualizer.saveImage(s, f.getAbsolutePath() + ".png")
+  }
 }
 
 object SimpleApp extends App {

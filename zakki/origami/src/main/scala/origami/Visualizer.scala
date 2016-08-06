@@ -18,6 +18,11 @@ object Visualizer {
     ImageIO.write(img, "png", new File(filename))
   }
 
+  def saveImage(p: Solution, filename: String) = {
+    val img = drawImage(p)
+    ImageIO.write(img, "png", new File(filename))
+  }
+
   def drawImage(p: Problem) = {
     val size = 500
     val pad = 40
@@ -76,6 +81,77 @@ object Visualizer {
       g.setColor(Color.GREEN.darker())
       g.drawString(v.toShortString(), x.toInt - 10, y.toInt + 5)
     }
+
+    g.dispose()
+    img
+  }
+
+  def drawImage(p: Solution) = {
+    val size = 500
+    val pad = 40
+    val srcArea = new RArea(p.source)
+    val dstArea = new RArea(p.destination)
+    val l = max(max(srcArea.width, srcArea.height), max(dstArea.width, dstArea.height))
+    val path = new GeneralPath(Path2D.WIND_EVEN_ODD)
+
+    val img = new BufferedImage(size * 2, size, BufferedImage.TYPE_3BYTE_BGR)
+    val g = img.getGraphics().asInstanceOf[Graphics2D]
+    g.setColor(Color.WHITE)
+    g.fillRect(0, 0, size * 2, size)
+
+    g.setColor(Color.RED)
+    g.drawLine(0, 0, size, size)
+
+    def getsx(x: Rational) = ((x - srcArea.minX) / l).toDouble * (size - pad * 2) + pad
+    def getsy(y: Rational) = ((srcArea.maxY - y) / l).toDouble * (size - pad * 2) + pad
+
+    def getdx(x: Rational) = size + ((x - dstArea.minX) / l).toDouble * (size - pad * 2) + pad
+    def getdy(y: Rational) = ((dstArea.maxY - y) / l).toDouble * (size - pad * 2) + pad
+
+    for (f <- p.facets) {
+      var start = true
+      for (v <- f.vertices.map(i => p.source(i))) {
+        val x = getsx(v.x)
+        val y = getsy(v.y)
+        if (start) {
+          path.moveTo(x, y)
+          start = false
+        } else {
+          path.lineTo(x, y)
+        }
+      }
+      path.closePath()
+    }
+    g.setColor(Color.LIGHT_GRAY)
+    g.fill(path)
+    g.setColor(Color.BLACK)
+    g.draw(path)
+
+    for (f <- p.facets) {
+      var start = true
+      for (v <- f.vertices.map(i => p.destination(i))) {
+        val x = getdx(v.x)
+        val y = getdy(v.y)
+        if (start) {
+          path.moveTo(x, y)
+          start = false
+        } else {
+          path.lineTo(x, y)
+        }
+      }
+      path.closePath()
+    }
+    g.setColor(Color.LIGHT_GRAY)
+    g.fill(path)
+    g.setColor(Color.BLACK)
+    g.draw(path)
+
+//    for (poly <- p.polygon; v <- poly.vertices) {
+//      val x = getx(v.x)
+//      val y = gety(v.y)
+//      g.setColor(Color.GREEN.darker())
+//      g.drawString(v.toShortString(), x.toInt - 10, y.toInt + 5)
+//    }
 
     g.dispose()
     img

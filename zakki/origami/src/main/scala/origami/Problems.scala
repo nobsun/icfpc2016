@@ -72,8 +72,36 @@ class Reader(lines: Array[String]) {
 
     Problem(polygon, edge)
   }
+
+  def readFacet(): SFacet = {
+    val tokens = readLine().split(" ")
+    val n = tokens(0).toInt
+    if (tokens.length != n + 1) throw new IllegalArgumentException()
+    val pts = (for (i <- 1 to n)
+      yield tokens(i).toInt).toVector
+    SFacet(pts)
+  }
+
+  def readSolution(): Solution = {
+    val n = readIntLine()
+    val src = (for (i <- 0 until n)
+      yield readVertexLine()).toVector
+    val ne = readIntLine()
+    val facets = (for (i <- 0 until ne)
+      yield readFacet()).toVector
+    val dst = (for (i <- 0 until n)
+      yield readVertexLine()).toVector
+    Solution(src, facets, dst)
+  }
 }
 
+case class SFacet(vertices: Vector[Int])
+
+case class Solution(source: Vector[Vertex],
+                    facets: Vector[SFacet],
+                    destination: Vector[Vertex]) {
+
+}
 
 object Util {
   def areaOf(p: Problem): (Rational, Rational, Rational, Rational) = {
