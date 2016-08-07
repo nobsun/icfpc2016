@@ -90,7 +90,6 @@ movePoly :: Vec -> Polygon -> Polygon
 movePoly vec (Polygon nv vs)
   = Polygon nv (map (second (moveVertex vec)) vs)
 
-
 combinations :: Int -> [a] -> [[a]]
 combinations n' xs' = comb n' (length xs') xs' where
   comb _ _ [] = [[]]
