@@ -17,6 +17,7 @@ library
   hs-source-dirs:      src
   exposed-modules:     Vertex
                      , Segment
+                     , Edge
                      , Polygon
                      , Problem
                      , Solution
