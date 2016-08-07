@@ -58,7 +58,15 @@ object Visualizer {
   }
 
   def drawImage(p: Problem, g: Graphics2D, size: Int, pad: Int) = {
-    val (minX, minY, maxX, maxY) = Util.areaOf(p)
+    val area = Util.areaOf(p)
+    val cx = (area.minX + area.maxX) / 2
+    val cy = (area.minY + area.maxY) / 2
+    area.update(Vertex(cx + r"1/2", cy + r"1/2"))
+    area.update(Vertex(cx - r"1/2", cy - r"1/2"))
+    val minX = area.minX
+    val minY = area.minY
+    val maxX = area.maxX
+    val maxY = area.maxY
     val w_ = maxX - minX
     val h_ = maxY - minY
     val l = max(w_, h_)
@@ -69,11 +77,16 @@ object Visualizer {
     g.setColor(Color.WHITE)
     g.fillRect(0, 0, size, size)
 
+    def getx(x: Rational) = ((x - minX) / w * (size - pad * 2)).toInt + pad
+    def gety(y: Rational) = ((maxY - y) / h * (size - pad * 2)).toInt + pad
+
     g.setColor(Color.RED)
     g.drawLine(0, 0, size, size)
 
-    def getx(x: Rational) = ((x - minX) / w * (size - pad * 2)).toInt + pad
-    def gety(y: Rational) = ((maxY - y) / h * (size - pad * 2)).toInt + pad
+    g.setColor(Color.GREEN)
+    g.fillRect(getx(cx - r"1/2"), gety(cy + r"1/2"),
+        (1 / w * (size - pad * 2)).toInt,
+        (1 / h * (size - pad * 2)).toInt)
 
     for (poly <- p.polygon) {
       var start = true

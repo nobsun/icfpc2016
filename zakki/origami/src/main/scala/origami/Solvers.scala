@@ -11,6 +11,7 @@ import javax.imageio.ImageIO
 import java.io.File
 import java.util.regex.Pattern.Dot
 import origami.math._
+import scala.collection.mutable.StringBuilder
 
 object Solver {
 
@@ -104,26 +105,25 @@ object Solver {
     edges.map(e => (vts.indexOf(e.a), vts.indexOf(e.b)))
   }
 
-
-    def isSelfCross(vertices: Vector[Vertex], vb: Vector[Int]): Boolean = {
-      val n = vb.length
-      for (i <- 0 until n) {
-        val pa0 = vertices(vb(i))
-        val pa1 = vertices(vb((i + 1) % n))
-        for (j <- i + 2 until n) {
-          val pb0 = vertices(vb(j))
-          val pb1 = vertices(vb((j + 1) % n))
-          if (pb1 != pa0) {
-            val c = crossPoint(pa0, pa1, pb0, pb1)
-            //println("check cross " + i + "/" + j + " " + c + " " + pa0 + ", " + pa1 + " ## " +
-            //  pb0 + ", " + pb1)
-            if (c.isDefined)
-              return true
-          }
+  def isSelfCross(vertices: Vector[Vertex], vb: Vector[Int]): Boolean = {
+    val n = vb.length
+    for (i <- 0 until n) {
+      val pa0 = vertices(vb(i))
+      val pa1 = vertices(vb((i + 1) % n))
+      for (j <- i + 2 until n) {
+        val pb0 = vertices(vb(j))
+        val pb1 = vertices(vb((j + 1) % n))
+        if (pb1 != pa0) {
+          val c = crossPoint(pa0, pa1, pb0, pb1)
+          //println("check cross " + i + "/" + j + " " + c + " " + pa0 + ", " + pa1 + " ## " +
+          //  pb0 + ", " + pb1)
+          if (c.isDefined)
+            return true
         }
       }
-      return false
     }
+    return false
+  }
 
   def facets(edges: Vector[(Int, Int)], vertices: Vector[Vertex]) = {
     val p2eid = edges.zipWithIndex
@@ -218,7 +218,7 @@ object Solver {
     facets.values.toVector
   }
 
-  def apply(p: Problem) = {  
+  def apply(p: Problem) = {
     val edges = Solver.collectLine(p)
     val vts = edges.flatMap { e => List(e.a, e.b) }
       .toSet.toVector
@@ -269,35 +269,39 @@ class Solver(val problem: Problem,
     }).toVector
   }
 
-  def hint(): List[Node] = {
-    val series = List((-1, 28), (0, 8), (1, 27),
-      (0, 28), (1, 8), (2, 27),
-      (3, 28), (4, 8), (5, 27),
-      (6, 28), (7, 8), (8, 27),
-      (9, 28), (10, 8), (11, 27))
-
+  def hint(series: List[(Int, Int)]): List[Node] = {
     val ((_, s) :: rest) = series
     val c = createRootNode(s)
     createHintNode(rest, List(c))
   }
 
-  def createHintNode(series: List[(Int, Int)], ns: List[Node]): List[Node] = {
-    var r: List[Node] = Nil
-    for (n <- ns) {
-      series match {
-        case (t, s) :: rest =>
-          val cs = {
-            if (t >= 0)
-              n.expand(n.tfacets(t))
-            else
-              n.expand()
-          }.filter(c => c.tfacets.last.fid === s)
-          r :::= createHintNode(rest, cs)
-        case Nil =>
-          r ::= n
+  def createHintNode(series: List[(Int, Int)], ns0: List[Node]): List[Node] = {
+    var ns = ns0
+    for (s <- series) {
+      s match {
+        case (-1, s) => {
+          var r: List[Node] = Nil
+          for (n <- ns) {
+            val cs = n.expand()
+              .filter(c => c.tfacets.last.fid === s)
+            r :::= cs
+          }
+          ns = r
+        }
+        case (-2, s) =>
+          ns = List(ns(s))
+        case (t, s) => {
+          var r: List[Node] = Nil
+          for (n <- ns) {
+            val cs = n.expand(n.tfacets(t))
+              .filter(c => c.tfacets.last.fid === s)
+            r :::= cs
+          }
+          ns = r
+        }
       }
     }
-    r
+    ns
   }
 
   def translations(t: TFacet, i: Int, s: SEFacet, eid2: Int) = {
@@ -316,6 +320,27 @@ class Solver(val problem: Problem,
     //val p1 = t.vertices((i + 1) % t.vertices.length)
     List(createTrans(Edge(o0, o1), Edge(p0, p1)),
       createTrans2(Edge(o0, o1), Edge(p0, p1)))
+  }
+
+  def dump(node: Node): String = {
+    val trans = normalTrans(node.toFacets())
+	  val tvs = node.tfacets.flatMap(t => t.vertices).toSet.toVector
+	  val tvsn = trans.map(tr => tvs.map(v => tr.transform(v))).getOrElse(tvs)
+	  var str = tvs.length + "\n"
+	  str += tvsn.map(v => v.x + "," + v.y).mkString("\n")
+	  str += "\n"
+	  str += node.tfacets.length + "\n"
+	  for (t <- node.tfacets) {
+	    str += t.vertices.length
+	    str += " "
+	    str += t.vertices.map(p => tvs.indexOf(p)).mkString(" ")
+	    str += "\n"
+	  }
+	  str += tvs.map { tv =>
+	    vertices(node.vmap(tv))
+	  }.map(v => v.x + "," + v.y).mkString("\n")
+	  str += "\n"
+	  str
   }
 
   case class Node(val tfacets: Vector[TFacet]) {
@@ -374,7 +399,7 @@ class Solver(val problem: Problem,
             val vid = f2.vertices(j)
             if (vmap.contains(tv) && vmap(tv) != vid) {
               //invalid
-              println("  mismatch " + vmap(tv) + "/" + vid)
+              //println("  mismatch " + vmap(tv) + "/" + vid)
               valid = false
             } else if (tfacets.exists(f => f.vertices.toSet == vs.toSet)) {
               //println("  same ")
@@ -407,6 +432,44 @@ class Solver(val problem: Problem,
 
   import Solver._
 
+  def normalTrans(fs: Seq[Facet]): Option[Transform] = {
+    val vs0 = fs.flatMap((f: Facet) => f.vertices).toSet
+    val vs = vs0.toList
+      .sortBy { _.x }
+    if (vs.length < 4)
+      return None
+    val v0 = vs(0)
+    var v1 = vs(1)
+    for (i <- 2 until vs.length) {
+      val v2 = vs(i)
+      val d1 = v1 - v0
+      val d2 = v2 - v0
+      val c = d1.x * d2.y - d2.x * d1.y
+      if (c < 0)
+        v1 = v2
+      else if (c == 0 && d1.dot(d1) < d2.dot(d2))
+        v1 = v2
+    }
+    val du = v1 - v0
+    val l = du dot du
+    val dv = Vertex(du.y, -du.x)
+    val r2 = vs.map(v => (v - v0) dot (v - v0)).max
+    println("**** " + l + "  "+ r2)
+    if (l > 1)
+      return None
+    if (r2 > 2)
+      return None
+    if (l < 1 || r2 < 2)
+      return None
+    //ignore scale
+    val t = createTrans(Edge(v0, v1),
+      Edge(Vertex(Rational(0), Rational(0)), Vertex(Rational(1), Rational(0))))
+    val a = new RArea(vs.map(v => t.transform(v)))
+
+    val t2 = t.copy(o1 = t.o1 - Vertex(a.minX, a.minY))
+    return Some(t2)
+  }
+
   def isSquareLike(vs: Seq[Vertex]): Int = {
     val v0 = vs(0)
     var v1 = vs(1)
@@ -414,14 +477,17 @@ class Solver(val problem: Problem,
       val v2 = vs(i)
       val d1 = v1 - v0
       val d2 = v2 - v0
-      if (d1.x * d2.y - d2.x * d1.y < 0)
+      val c = d1.x * d2.y - d2.x * d1.y
+      if (c < 0)
+        v1 = v2
+      else if (c == 0 && d1.dot(d1) < d2.dot(d2))
         v1 = v2
     }
     val du = v1 - v0
     val l = du dot du
     val dv = Vertex(du.y, -du.x)
     val r2 = vs.map(v => (v - v0) dot (v - v0)).max
-    //println("**** " + l + "  "+ r2)
+    println("****size " + l + "  "+ r2)
     if (l > 1)
       return MORE
     if (r2 > 2)
@@ -439,22 +505,22 @@ class Solver(val problem: Problem,
       return LESS
     if (!vs1.exists(p => p.x == a.minX && p.y == a.minY)) {
       //println(vs1)
-      //println("no minmin " + a.minX + ", " + a.minY)
+      println("no minmin " + a.minX + ", " + a.minY)
       return LESS
     }
     if (!vs1.exists(p => p.x == a.maxX && p.y == a.minY)) {
       //println(vs1)
-      //println("no maxmin " + a.maxX + ", " + a.minY)
+      println("no maxmin " + a.maxX + ", " + a.minY)
       return LESS
     }
     if (!vs1.exists(p => p.x == a.minX && p.y == a.maxY)) {
       //println(vs1)
-      //println("no minmax " + a.minX + ", " + a.maxY)
+      println("no minmax " + a.minX + ", " + a.maxY)
       return LESS
     }
     if (!vs1.exists(p => p.x == a.maxX && p.y == a.maxY)) {
       //println(vs1)
-      //println("no maxmax " + a.maxX + ", " + a.maxY)
+      println("no maxmax " + a.maxX + ", " + a.maxY)
       return LESS
     }
     return OK
@@ -462,10 +528,15 @@ class Solver(val problem: Problem,
 
   def isSquare(fs: Seq[Facet]): Int = {
     val vs0 = fs.flatMap((f: Facet) => f.vertices).toSet
-    val vs = vs0.toList
-      .sortBy { _.x }
+    val vs = vs0.toList.sortWith((a: Vertex, b: Vertex) => {
+        if (a.x == b.x)
+          a.y < b.y
+        else
+          a.x < b.x
+      })
+      //.sortBy { _.x }
     if (vs.length < 4) {
-      //println("few vertex")
+      println("few vertex")
       return LESS
     }
     return isSquareLike(vs)

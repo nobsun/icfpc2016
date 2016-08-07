@@ -99,7 +99,7 @@ case class Solution(source: Vector[Vertex],
 }
 
 object Util {
-  def areaOf(p: Problem): (Rational, Rational, Rational, Rational) = {
+  def areaOf(p: Problem): RArea = {
     val area = new RArea(p.polygon(0).vertices(0))
 
     for (poly <- p.polygon; v <- poly.vertices) {
@@ -109,7 +109,7 @@ object Util {
       area.update(e.a)
       area.update(e.b)
     }
-    (area.minX, area.minY, area.maxX, area.maxY)
+    area
   }
 
   def collectLine(p: Problem): Vector[Edge] = {
