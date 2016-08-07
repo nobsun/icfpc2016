@@ -30,6 +30,7 @@ library
                      , Command
 
                      , REST.Response
+                     , REST.File
 
   build-depends:       aeson
                      , array >= 0.5.1.0

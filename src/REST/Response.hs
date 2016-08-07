@@ -7,6 +7,8 @@ module REST.Response (
   SolutionSubmission (..),
 
   BlobSnapshot (..), Problem (..), Ranking (..), LeaderBoard (..), User (..),
+
+  Resemblance, Timestamp, Size,
   ) where
 
 import GHC.Generics (Generic)
