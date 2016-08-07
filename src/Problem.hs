@@ -72,6 +72,19 @@ loadProblem n = do
   maybe (fail "loadProblem: parse error") return
     $ listToMaybe [ x | (x, "") <- readP_to_S (parseProblem <* skipSpaces) q ]
 
+genSimpleAnswer' :: Int -> IO ()
+genSimpleAnswer' n = do
+    p <- loadProblem n
+    let vs = concatMap (map snd.pvertice.snd) $ polygons p
+        (dx, dy) = (minimum $ map xcoord vs, minimum $ map ycoord vs)
+        vs' = map (mv (dx, dy)) [(0,0), (1,0), (1,1), (0,1)]
+        ans = ["4", "0,0", "1,0", "1,1", "0,1", "1", "4 0 1 2 3"] ++ map showT vs'
+    writeFile ("answers/"++show n++".dat") $ unlines ans
+  where
+    mv (dx, dy) (x, y) = (x+dx, y+dy)
+    showR r = show (numerator r) ++ "/" ++ show (denominator r)
+    showT (x, y) = showR x ++ "," ++ showR y
+
 genSimpleAnswer :: Int -> IO ()
 genSimpleAnswer n = do
   solFound  <-  doesFileExist $ solutionFile n
@@ -79,19 +92,8 @@ genSimpleAnswer n = do
   if solFound
     then putStrLn $ "solution file already exists: " ++ solutionFile n
     else if b
-         then do
-           p <- loadProblem n
-           let vs = concatMap (map snd.pvertice.snd) $ polygons p
-               (dx, dy) = (minimum $ map xcoord vs, minimum $ map ycoord vs)
-               vs' = map (mv (dx, dy)) [(0,0), (1,0), (1,1), (0,1)]
-               ans = ["4", "0,0", "1,0", "1,1", "0,1", "1", "4 0 1 2 3"] ++ map showT vs'
-           writeFile ("answers/"++show n++".dat") $ unlines ans
-         else putStrLn $ "problem file not found: " ++ problemFile n
-  where
-    mv (dx, dy) (x, y) = (x+dx, y+dy)
-    showR r = show (numerator r) ++ "/" ++ show (denominator r)
-    showT (x, y) = showR x ++ "," ++ showR y
-
+         then genSimpleAnswer' n
+         else fail $ "problem file not found: " ++ problemFile n
 
 moveVertex :: Vec -> Vertex -> Vertex
 moveVertex (dx, dy) (Vertex x y) = (Vertex (x + dx) (y + dy))
@@ -154,8 +156,8 @@ sort xs ys =
         then sort (xs++[(y1,y2)]) $ delete (y1,y2) ys
         else sort (xs ++ [(y2,y1)]) $ delete (y1,y2) ys)
      mnext
-     
-    
+
+
 combine :: Maybe [Segment] -> Maybe [Segment] -> Maybe [Segment]
 combine Nothing   ys        = ys
 combine xs        Nothing   = xs
