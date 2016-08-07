@@ -119,9 +119,7 @@ combinations n' xs' = comb n' (length xs') xs' where
 
 -- | for facets only
 combinations' :: [a] -> [[a]]
-combinations' xs = concatMap (\n -> combinations n xs) size
-  where
-    size = [3..(length xs)]
+combinations' xs = concatMap (\n -> combinations n xs) [3..(length xs)]
 
 combine :: Maybe [Segment] -> Maybe [Segment] -> Maybe [Segment]
 combine Nothing   ys        = ys
