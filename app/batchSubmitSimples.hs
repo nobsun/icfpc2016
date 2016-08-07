@@ -4,7 +4,7 @@ import System.IO.Error (tryIOError)
 import System.Directory (doesFileExist)
 
 import File (responseFile)
-import Problem (genSimpleAnswer)
+import Solution (genSimpleAnswer)
 import Command (runCommand)
 import ProblemDupes (genDupesMap)
 
