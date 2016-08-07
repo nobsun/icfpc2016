@@ -91,13 +91,14 @@ object CLI {
       val t = solver.isSquare(fs)
       println(i + ": " + t)
       if (t == Solver.OK) {
+        Visualizer.saveImage(p1, new File("out", "hint." + i + ".png"))
         val str = solver.dump(n)
         println("**answer*******")
         println(str)
         Files.write(new File("out", "hint." + i + ".txt").toPath(), str.getBytes)
       } else if (t == Solver.MORE) {
         println(">> " + t)
-        Visualizer.saveImage(p1, new File("out", "hint." + i + "out.png"))
+        Visualizer.saveImage(p1, new File("out", "hint." + i + ".png"))
       } else {
         Visualizer.saveImage(p1, new File("out", "hint." + i + ".png"))
       }
