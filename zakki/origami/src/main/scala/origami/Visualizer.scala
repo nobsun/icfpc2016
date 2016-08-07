@@ -7,24 +7,57 @@ import java.awt.image.BufferedImage
 import java.awt.geom._
 import java.awt.Color
 import java.awt.Graphics2D
+import java.io.Writer
+import java.io.OutputStreamWriter
 import javax.imageio.ImageIO
 import java.io.File
 import origami.math._
 
+import org.apache.batik.svggen.SVGGraphics2D
+import org.apache.batik.dom.GenericDOMImplementation
+
+import org.w3c.dom.Document
+import org.w3c.dom.DOMImplementation
+import java.io.FileOutputStream
+
 object Visualizer {
-  def saveImage(p: Problem, filename: String) = {
-    val img = drawImage(p)
-    ImageIO.write(img, "png", new File(filename))
-  }
-
-  def saveImage(p: Solution, filename: String) = {
-    val img = drawImage(p)
-    ImageIO.write(img, "png", new File(filename))
-  }
-
-  def drawImage(p: Problem) = {
+  def saveImage(p: Problem, f: File) = {
+    if (!f.getParentFile().exists())
+      f.getParentFile().mkdirs()
     val size = 500
     val pad = 40
+    val img = new BufferedImage(size, size, BufferedImage.TYPE_3BYTE_BGR)
+    val g = img.getGraphics().asInstanceOf[Graphics2D]
+    drawImage(p, g, size, pad)
+    ImageIO.write(img, "png", f)
+  }
+
+  def saveSvg(p: Problem, f: File) = {
+    if (!f.getParentFile().exists())
+      f.getParentFile().mkdirs()
+    val size = 500
+    val pad = 40
+    val img = new BufferedImage(size, size, BufferedImage.TYPE_3BYTE_BGR)
+
+    val domImpl = GenericDOMImplementation.getDOMImplementation();
+    val svgNS = "http://www.w3.org/2000/svg";
+    val document = domImpl.createDocument(svgNS, "svg", null);
+
+    // Create an instance of the SVG Generator.
+    val g = new SVGGraphics2D(document);
+    drawImage(p, g, size, pad)
+    val out = new OutputStreamWriter(new FileOutputStream(f), "UTF-8")
+    g.stream(out, true)//use css
+  }
+
+  def saveImage(p: Solution, f: File) = {
+    if (!f.getParentFile().exists())
+      f.getParentFile().mkdirs()
+    val img = drawImage(p)
+    ImageIO.write(img, "png", f)
+  }
+
+  def drawImage(p: Problem, g: Graphics2D, size: Int, pad: Int) = {
     val (minX, minY, maxX, maxY) = Util.areaOf(p)
     val w_ = maxX - minX
     val h_ = maxY - minY
@@ -33,8 +66,6 @@ object Visualizer {
     val h = l
     val path = new GeneralPath(Path2D.WIND_EVEN_ODD)
 
-    val img = new BufferedImage(size, size, BufferedImage.TYPE_3BYTE_BGR)
-    val g = img.getGraphics().asInstanceOf[Graphics2D]
     g.setColor(Color.WHITE)
     g.fillRect(0, 0, size, size)
 
@@ -91,7 +122,6 @@ object Visualizer {
     }
 
     g.dispose()
-    img
   }
 
   def drawImage(p: Solution) = {

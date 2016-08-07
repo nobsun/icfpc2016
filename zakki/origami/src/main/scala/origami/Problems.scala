@@ -105,6 +105,10 @@ object Util {
     for (poly <- p.polygon; v <- poly.vertices) {
       area.update(v)
     }
+    for (e <- p.edges) {
+      area.update(e.a)
+      area.update(e.b)
+    }
     (area.minX, area.minY, area.maxX, area.maxY)
   }
 

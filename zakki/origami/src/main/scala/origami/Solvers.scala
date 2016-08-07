@@ -11,7 +11,6 @@ import javax.imageio.ImageIO
 import java.io.File
 import java.util.regex.Pattern.Dot
 import origami.math._
-import javafx.scene.chart.XYChart.Series
 
 object Solver {
 
@@ -27,40 +26,104 @@ object Solver {
       if (!edges.exists(_.equals(pa, pb)))
         edges ::= Edge(pa, pb)
     }
+    var vertices: Set[Vertex] =
+      p.polygon.flatMap(p => p.vertices).toSet
     for (e <- p.edges) {
       if (!edges.exists(_.equals(e.a, e.b)))
         edges ::= e
+      vertices += e.a
+      vertices += e.b
     }
     val edges2 = edges.toVector
     var es: Set[Edge] = Set()
     for (i <- 0 until edges2.length) {
       val ap1 = edges2(i)
       var ps = Set(ap1.a, ap1.b)
-      for (j <- 0 until edges2.length if i != j) {
-        val ap2 = edges(j)
-        crossPoint(ap1, ap2) match {
-          case Some(p) => {
-            ps += p
-          }
-          case None =>
+      for (p <- vertices) {
+        val d0 = p - ap1.a
+        val d1 = ap1.b - ap1.a
+        if (d0.cross(d1) == 0 && d0.dot(d0) < d1.dot(d1) && d0.dot(d1) > 0) {
+          ps += p
+          println("division " + ap1 + " by " + p)
         }
       }
+
+      //      for (j <- 0 until edges2.length if i != j) {
+      //        val ap2 = edges(j)
+      //        crossPoint(ap1, ap2) match {
+      //          case Some(p) => {
+      //            ps += p
+      //          }
+      //          case None =>
+      //        }
+      //      }
+
       val ps2 = ps.toBuffer.sortWith((a: Vertex, b: Vertex) => {
         if (a.x == b.x)
-          a.y < a.y
+          a.y < b.y
         else
           a.x < b.x
       })
+      println(ps2.length + "  " + ap1.a + " .. " + ap1.b)
+      println("   " + ps)
       for (j <- 1 until ps2.length) {
         es = es + Edge(ps2(j - 1), ps2(j))
       }
     }
     es.toVector
+
+    //    edges.toVector
+    //    val edges2 = edges.toVector
+    //    var es: Set[Edge] = Set()
+    //    for (i <- 0 until edges2.length) {
+    //      val ap1 = edges2(i)
+    //      var ps = Set(ap1.a, ap1.b)
+    //      for (j <- 0 until edges2.length if i != j) {
+    //        val ap2 = edges(j)
+    //        crossPoint(ap1, ap2) match {
+    //          case Some(p) => {
+    //            ps += p
+    //          }
+    //          case None =>
+    //        }
+    //      }
+    //      val ps2 = ps.toBuffer.sortWith((a: Vertex, b: Vertex) => {
+    //        if (a.x == b.x)
+    //          a.y < a.y
+    //        else
+    //          a.x < b.x
+    //      })
+    //      for (j <- 1 until ps2.length) {
+    //        es = es + Edge(ps2(j - 1), ps2(j))
+    //      }
+    //    }
+    //    es.toVector
   }
 
   def toId(edges: Vector[Edge], vts: Vector[Vertex]): Vector[(Int, Int)] = {
     edges.map(e => (vts.indexOf(e.a), vts.indexOf(e.b)))
   }
+
+
+    def isSelfCross(vertices: Vector[Vertex], vb: Vector[Int]): Boolean = {
+      val n = vb.length
+      for (i <- 0 until n) {
+        val pa0 = vertices(vb(i))
+        val pa1 = vertices(vb((i + 1) % n))
+        for (j <- i + 2 until n) {
+          val pb0 = vertices(vb(j))
+          val pb1 = vertices(vb((j + 1) % n))
+          if (pb1 != pa0) {
+            val c = crossPoint(pa0, pa1, pb0, pb1)
+            //println("check cross " + i + "/" + j + " " + c + " " + pa0 + ", " + pa1 + " ## " +
+            //  pb0 + ", " + pb1)
+            if (c.isDefined)
+              return true
+          }
+        }
+      }
+      return false
+    }
 
   def facets(edges: Vector[(Int, Int)], vertices: Vector[Vertex]) = {
     val p2eid = edges.zipWithIndex
@@ -77,6 +140,20 @@ object Solver {
         dir0.dot(dir) > 0
       else
         c > 0
+    }
+
+    def isValidDir(vb: Vector[Int]): Boolean = {
+      val n = vb.length
+      var valid2 = true
+      for (i <- 0 until n) {
+        //println("check2 " + (i, (i + 1) % n, (i + 2) %n))
+        if (!isValid(vb(i), vb((i + 1) % n), vb((i + 2) % n))) {
+          //if (!isValid((i + 2) % n, (i + 1) % n, i)) {
+          //println("bad facet dir " + i)
+          return false
+        }
+      }
+      return true
     }
 
     def needShrink(p0: Int, p1: Int, p2: Int): Boolean = {
@@ -113,19 +190,15 @@ object Solver {
               // if (isValid(np, cp, vs(1)))
               val vb = vs.toVector
               val n = vb.length
-              var valid2 = true
-              for (i <- 0 until n) {
-                //println("check2 " + (i, (i + 1) % n, (i + 2) %n))
-                if (!isValid(vb(i), vb((i + 1) % n), vb((i + 2) % n))) {
-                  //if (!isValid((i + 2) % n, (i + 1) % n, i)) {
-                  //println("bad facet dir " + i)
-                  valid2 = false
-                }
+              var valid2 = isValidDir(vb)
+              if (valid2 && isSelfCross(vertices, vb)) {
+                //println("self cross")
+                valid2 = false
               }
               if (valid2)
                 facets += (vs.toSet -> SEFacet(vb, es.toVector))
-              else
-                println("bad facet dir " + vb)
+              //else
+              //println("bad facet dir " + vb)
             } else {
               //println("skip " + np + vs.last + " ## " + vs)
             }
@@ -145,7 +218,7 @@ object Solver {
     facets.values.toVector
   }
 
-  def apply(p: Problem) = {
+  def apply(p: Problem) = {  
     val edges = Solver.collectLine(p)
     val vts = edges.flatMap { e => List(e.a, e.b) }
       .toSet.toVector
@@ -198,10 +271,10 @@ class Solver(val problem: Problem,
 
   def hint(): List[Node] = {
     val series = List((-1, 28), (0, 8), (1, 27),
-     (0, 28), (1, 8), (2, 27),
-     (3, 28), (4, 8), (5, 27),
-     (6, 28), (7, 8), (8, 27),
-     (9, 28), (10, 8), (11, 27))
+      (0, 28), (1, 8), (2, 27),
+      (3, 28), (4, 8), (5, 27),
+      (6, 28), (7, 8), (8, 27),
+      (9, 28), (10, 8), (11, 27))
 
     val ((_, s) :: rest) = series
     val c = createRootNode(s)
@@ -246,12 +319,12 @@ class Solver(val problem: Problem,
   }
 
   case class Node(val tfacets: Vector[TFacet]) {
-//    val polygons = {
-//      {
-//        for (t <- tfacets)
-//          yield facets(t.fid).vertices.map(vid => t.t.transform(vertices(vid)))
-//      }.toList
-//    }
+    //    val polygons = {
+    //      {
+    //        for (t <- tfacets)
+    //          yield facets(t.fid).vertices.map(vid => t.t.transform(vertices(vid)))
+    //      }.toList
+    //    }
     val (vmap, eset) = {
       var m: Map[Vertex, Int] = Map()
       var es: List[(Edge, TFacet)] = Nil
@@ -307,14 +380,14 @@ class Solver(val problem: Problem,
               //println("  same ")
               valid = false
             } else if (tfacets.exists(f => intersect(f.vertices, vs))) {
-//              for (f <- tfacets) {
-//                if (intersect(f.vertices, vs))
-//                	println("  intersect " + vs + "/" + f.vertices)
-//              }
+              //              for (f <- tfacets) {
+              //                if (intersect(f.vertices, vs))
+              //                	println("  intersect " + vs + "/" + f.vertices)
+              //              }
               valid = false
-//            } else if (polygons.exists(poly => isInner(tv, poly))) {
-//              println("  conflict " + tv + "/" + f)
-//              valid = false
+              //            } else if (polygons.exists(poly => isInner(tv, poly))) {
+              //              println("  conflict " + tv + "/" + f)
+              //              valid = false
             }
           }
           //println("  " + valid + " " + t)
@@ -348,7 +421,7 @@ class Solver(val problem: Problem,
     val l = du dot du
     val dv = Vertex(du.y, -du.x)
     val r2 = vs.map(v => (v - v0) dot (v - v0)).max
-    println("**** " + l + "  "+ r2)
+    //println("**** " + l + "  "+ r2)
     if (l > 1)
       return MORE
     if (r2 > 2)
