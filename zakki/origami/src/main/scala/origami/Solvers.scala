@@ -11,7 +11,6 @@ import javax.imageio.ImageIO
 import java.io.File
 import java.util.regex.Pattern.Dot
 import origami.math._
-import javafx.scene.chart.XYChart.Series
 
 object Solver {
 

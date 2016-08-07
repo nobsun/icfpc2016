@@ -24,7 +24,9 @@ object CreateProblemImages extends App {
       val p = new Reader(lines).readProblem
       println(p)
       Visualizer.saveImage(p, new File("problems-img", f.getName() + ".png"))
-      SimpleApp.dumpFacet(Solver(p), new File("problems-img", f.getName + ".facet"))
+      Visualizer.saveSvg(p, new File("problems-img", f.getName() + ".svg"))
+      if ("true" == System.getProperty("origami.dumpfacets"))
+        SimpleApp.dumpFacet(Solver(p), new File("problems-img", f.getName + ".facet"))
     } catch {
       case e: Throwable =>
         Console.err.println("parse error " + f)

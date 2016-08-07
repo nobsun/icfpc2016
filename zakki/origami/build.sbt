@@ -10,9 +10,8 @@ scalaVersion := "2.11.7"
 libraryDependencies ++= Seq(
     "org.scalatest"   %% "scalatest"    % "2.2.4"   % "test"
 )
-import AssemblyKeys._ // put this at the top of the file
-
-assemblySettings
+// import AssemblyKeys._ // put this at the top of the file
+// assemblySettings
 
 // For Settings/Task reference, see http://www.scala-sbt.org/release/sxr/sbt/Keys.scala.html
 
@@ -30,3 +29,13 @@ EclipseKeys.withSource := true
 libraryDependencies += "org.spire-math" %% "spire" % "0.11.0"
 libraryDependencies += "junit" % "junit" % "4.12"
 libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
+libraryDependencies += "org.apache.xmlgraphics" % "fop" % "2.1"
+
+assemblyMergeStrategy in assembly := {
+    case PathList(ps @ _*) if ps.last endsWith ".class" => MergeStrategy.first
+    case x =>
+       val oldStrategy = (assemblyMergeStrategy in assembly).value
+       oldStrategy(x)
+}
+//libraryDependencies ++= Seq(
+//exclude("org.eclipse.jetty.orbit", "javax.servlet")
