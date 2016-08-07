@@ -18,9 +18,16 @@ import java.nio.file.Files;
 object CreateProblemImages extends App {
   def createImage(f: File): Unit = {
     val lines = Files.readAllLines(f.toPath()).toArray(Array[String]())
-    val p = new Reader(lines).readProblem
-    println(p)
-    Visualizer.saveImage(p, f.getAbsolutePath() + ".png")
+    println("> " + f)
+    //if (!new File(f.getAbsoluteFile + ".png").exists())
+    try {
+      val p = new Reader(lines).readProblem
+      println(p)
+      Visualizer.saveImage(p, f.getAbsolutePath() + ".png")
+    } catch {
+      case e: Throwable =>
+        Console.err.println("parse error " + f)
+    }
   }
 
   for (a <- args) {
@@ -28,7 +35,7 @@ object CreateProblemImages extends App {
     if (f.isFile()) {
       createImage(f)
     } else {
-      for (ff <- f.listFiles() if ff.isFile() && ff.getName.endsWith(".dat")) {
+      for (ff <- f.listFiles().par if ff.isFile() && ff.getName.endsWith(".dat")) {
         createImage(ff)
       }
     }
@@ -37,10 +44,15 @@ object CreateProblemImages extends App {
 
 object CreateSolutionImages extends App {
   def createImage(f: File) = {
-    val lines = Files.readAllLines(f.toPath()).toArray(Array[String]())
-    val s = new Reader(lines).readSolution()
-    println(s)
-    Visualizer.saveImage(s, f.getAbsolutePath() + ".png")
+    try {
+      val lines = Files.readAllLines(f.toPath()).toArray(Array[String]())
+      val s = new Reader(lines).readSolution()
+      println(s)
+      Visualizer.saveImage(s, f.getAbsolutePath() + ".png")
+    } catch {
+      case e: Throwable =>
+        Console.err.println("parse error " + f)
+    }
   }
 
   for (a <- args) {
@@ -49,7 +61,7 @@ object CreateSolutionImages extends App {
     if (f.isFile()) {
       createImage(f)
     } else {
-      for (ff <- f.listFiles() if (ff.isFile() && ff.getName.endsWith(".dat"))) {
+      for (ff <- f.listFiles().par if (ff.isFile() && ff.getName.endsWith(".dat"))) {
         createImage(ff)
       }
     }
@@ -63,30 +75,30 @@ object SimpleApp extends App {
     //val queue = new scala.collection.mutable.Stack[solver.Node]
     queue ++= solver.createRoot()
     if (true) {
-    val hs = solver.hint()
-    println("#####")
-    for (i <- 0 until hs.length) {
-      val n = hs(i)
-      val fs = n.toFacets()
-      val es = n.eset.keys.toVector
-      val p1 = Problem(fs.map(f => Polygon(f.vertices)), es)
-      println(p1)
+      val hs = solver.hint()
+      println("#####")
+      for (i <- 0 until hs.length) {
+        val n = hs(i)
+        val fs = n.toFacets()
+        val es = n.eset.keys.toVector
+        val p1 = Problem(fs.map(f => Polygon(f.vertices)), es)
+        println(p1)
 
-      for (f <- n.tfacets; f2 <- n.tfacets if f != f2) {
-        if (intersect(f.vertices, f2.vertices))
-          println("  intersect " + f.vertices + "/" + f2.vertices)
+        for (f <- n.tfacets; f2 <- n.tfacets if f != f2) {
+          if (intersect(f.vertices, f2.vertices))
+            println("  intersect " + f.vertices + "/" + f2.vertices)
+        }
+        val t = solver.isSquare(fs)
+        if (t == Solver.MORE) {
+          println(">> " + t)
+        } else {
+          val name = f.getAbsolutePath + ".hint." + i + ".png"
+          println(">> " + name)
+          Visualizer.saveImage(p1, name)
+        }
       }
-      val t = solver.isSquare(fs)
-      if (t == Solver.MORE) {
-      println(">> " + t)
-      } else {
-      val name = f.getAbsolutePath + ".hint." + i + ".png"
-      println(">> " + name)
-      Visualizer.saveImage(p1, name)
-      }
-    }
 
-    queue ++= hs
+      queue ++= hs
     }
     //queue.pushAll(solver.createRoot())
     var i = 0
