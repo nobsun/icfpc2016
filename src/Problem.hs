@@ -108,6 +108,20 @@ movePoly :: Vec -> Polygon -> Polygon
 movePoly vec (Polygon nv vs)
   = Polygon nv (map (second (moveVertex vec)) vs)
 
+
+combinations :: Int -> [a] -> [[a]]
+combinations n xs = comb n (length xs) xs where
+  comb 0 _ _ = [[]]
+  comb r n a@(x:xs)
+    | n == r = [a]
+    | otherwise = map (x:) (comb (r-1) (n-1) xs) ++ comb r (n-1) xs
+
+-- | for facets only
+combinations' :: [a] -> [[a]]
+combinations' xs = concatMap (\n -> combinations n xs) size
+  where
+    size = [3..(length xs)]
+
 combine :: Maybe [Segment] -> Maybe [Segment] -> Maybe [Segment]
 combine Nothing   ys        = ys
 combine xs        Nothing   = xs
@@ -124,3 +138,7 @@ combine (Just xs) (Just ys) =
 cyclic :: [Segment] -> Bool
 cyclic = uncurry (==) . (fst . head &&& snd . last)
 
+type Facet = [Segment]
+
+facets :: [Segment] -> [Facet]
+facets = undefined
