@@ -107,3 +107,20 @@ moveSeg vec (v1,v2) = (moveVert vec v1, moveVert vec v2)
 movePoly :: Vec -> Polygon -> Polygon
 movePoly vec (Polygon nv vs)
   = Polygon nv (map (second (moveVertex vec)) vs)
+
+combine :: Maybe [Segment] -> Maybe [Segment] -> Maybe [Segment]
+combine Nothing   ys        = ys
+combine xs        Nothing   = xs
+combine (Just xs) (Just ys) =
+  let (x1, x2) = (fst . head &&& snd . last) xs
+      (y1, y2) = (fst . head &&& snd . last) ys
+  in
+    if      x1 == y1 then Just $ reverse xs ++ ys
+    else if x2 == y1 then Just $ xs         ++ ys
+    else if x1 == y2 then Just $ reverse xs ++ reverse ys
+    else if x2 == y2 then Just $ xs         ++ reverse ys
+    else Nothing
+
+cyclic :: [Segment] -> Bool
+cyclic = uncurry (==) . (fst . head &&& snd . last)
+
