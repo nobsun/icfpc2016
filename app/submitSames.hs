@@ -8,11 +8,10 @@ import Data.List (stripPrefix, isSuffixOf, sort)
 import Data.List.Split (splitOn)
 import Text.Read (readMaybe)
 import System.Directory (doesFileExist)
-import System.Process (rawSystem)
-import System.Exit
 import System.Environment (getArgs)
 
 import File (solutionFile, problemFile)
+import Command (runCommand)
 
 
 takeProblemNum :: String -> Maybe Int
@@ -31,13 +30,6 @@ genDupesMap =
   filter (not . null)
   . mapMaybe (uncons . sort . mapMaybe takeProblemNum)
   . splitOn [""] . lines
-
-runCommand :: String -> [String] -> IO ()
-runCommand cmd args = do
-  ec <- rawSystem cmd args
-  case ec of
-    ExitSuccess     -> return ()
-    ExitFailure en  -> putStrLn $ "Error exit with " ++ show en ++ ": " ++ unwords (cmd : args)
 
 submitCopyInterval :: Maybe Int -> Int -> Int -> IO ()
 submitCopyInterval sleep orig dest = do
