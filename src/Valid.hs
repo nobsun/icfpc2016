@@ -5,7 +5,7 @@ import Data.List
 import Data.Char
 import Vertex
 import Segment
-import Polygon
+-- import Polygon
 import Solution
 
 check :: Solution -> [Bool]
