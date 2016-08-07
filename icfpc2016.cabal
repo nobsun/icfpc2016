@@ -25,6 +25,7 @@ library
                      , Rotate
                      , Move
                      , ProblemSubmit
+                     , File
 
                      , REST.Response
 
@@ -70,6 +71,7 @@ executable submit-same-answers
                      , filepath
                      , process
                      , split
+                     , icfpc2016
   default-language:    Haskell2010
   ghc-options:       -Wall
 
