@@ -26,7 +26,7 @@ object CreateProblemImages extends App {
       Visualizer.saveImage(p, new File("problems-img", f.getName() + ".png"))
       Visualizer.saveSvg(p, new File("problems-img", f.getName() + ".svg"))
       if ("true" == System.getProperty("origami.dumpfacets"))
-        SimpleApp.dumpFacet(Solver(p), new File("problems-img", f.getName + ".facet"))
+        CLI.dumpFacet(Solver(p), new File("problems-img", f.getName + ".facet"))
     } catch {
       case e: Throwable =>
         Console.err.println("parse error " + f)
@@ -37,7 +37,7 @@ object CreateProblemImages extends App {
     val f = new File(a)
     if (f.isFile()) {
       if (f.getName.endsWith(".dat"))
-      createImage(f)
+        createImage(f)
     } else {
       for (ff <- f.listFiles().par if ff.isFile() && ff.getName.endsWith(".dat")) {
         createImage(ff)
@@ -72,13 +72,40 @@ object CreateSolutionImages extends App {
   }
 }
 
-object SimpleApp extends App {
+object CLI {
+  def solveWithHint(solver: Solver, series: List[(Int, Int)]) = {
+    val series_ =
+      List((-1, 2), (0, 3), (1, 5), (2, 29), (0, 32), (0, 2), (-2, 16))
+    val hs = solver.hint(series)
+    println("#####")
+    for (i <- 0 until hs.length) {
+      val n = hs(i)
+      val fs = n.toFacets()
+      val es = n.eset.keys.toVector
+      val p1 = Problem(fs.map(f => Polygon(f.vertices)), es)
+      println(p1)
+
+      val t = solver.isSquare(fs)
+      if (t == Solver.OK) {
+        val str = solver.dump(n)
+        println("**answer*******")
+        println(str)
+        Files.write(new File("out", "hint." + i + ".txt").toPath(), str.getBytes)
+      } else if (t == Solver.MORE) {
+        println(">> " + t)
+        Visualizer.saveImage(p1, new File("out", "hint." + i + "out.png"))
+      } else {
+        Visualizer.saveImage(p1, new File("out", "hint." + i + ".png"))
+      }
+    }
+  }
+
   def solve(solver: Solver, f: File, num: Int): Boolean = {
     println(f)
     val queue = new scala.collection.mutable.Queue[solver.Node]
     //val queue = new scala.collection.mutable.Stack[solver.Node]
     if (true) {
-      val hs = solver.hint()
+      val hs = solver.hint(Nil)
       println("#####")
       for (i <- 0 until hs.length) {
         val n = hs(i)
@@ -87,10 +114,10 @@ object SimpleApp extends App {
         val p1 = Problem(fs.map(f => Polygon(f.vertices)), es)
         println(p1)
 
-//        for (f <- n.tfacets; f2 <- n.tfacets if f != f2) {
-//          if (intersect(f.vertices, f2.vertices))
-//            println("  intersect " + f.vertices + "/" + f2.vertices)
-//        }
+        //        for (f <- n.tfacets; f2 <- n.tfacets if f != f2) {
+        //          if (intersect(f.vertices, f2.vertices))
+        //            println("  intersect " + f.vertices + "/" + f2.vertices)
+        //        }
         val t = solver.isSquare(fs)
         if (t == Solver.MORE) {
           println(">> " + t)
@@ -166,6 +193,15 @@ object SimpleApp extends App {
     solve(solver, f, 500)
   }
 
+  def load(f: File): Solver = {
+    val lines = Files.readAllLines(f.toPath()).toArray(Array[String]())
+    val p = new Reader(lines).readProblem
+    Solver(p)
+  }
+}
+
+object SimpleApp extends App {
+  import CLI._
   if (true) {
     //solve(new File("../../problems/9.dat"))
     solve(new File("../../problems/25.dat"))
