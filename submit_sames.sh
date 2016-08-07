@@ -4,4 +4,4 @@
 ./update_clearlist.sh
 
 # attack for same problems
-fdupes -r problems/ | ./submit-same-answers
+fdupes -r problems/ | ./submit-same-answers "$1"

@@ -15,6 +15,6 @@ date +"TIMESTAMP 2: %Y-%m-%d %H:%M:%S"
 ./submit_simple.sh
 date +"TIMESTAMP 3: %Y-%m-%d %H:%M:%S"
 
-./submit_sames.sh
+./submit_sames.sh "$2"
 echo ""
 date +"TIMESTAMP E: %Y-%m-%d %H:%M:%S"
