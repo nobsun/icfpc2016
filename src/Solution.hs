@@ -3,15 +3,19 @@ module Solution where
 -- import Data.Ord (comparing)
 -- import Data.List (group,sort)
 -- import Data.Function (on)
--- import Data.Ratio
+import Data.Ratio
 import Data.Maybe
 import Text.ParserCombinators.ReadP
 import System.FilePath
+import System.Directory
+
 import Vertex
 -- import Segment
 import Polygon
--- import Problem
+import Problem hiding (facets)
 import Rotate
+import File (problemFile, solutionFile)
+
 
 data Solution = Solution
   { snVertex  :: Int
@@ -94,3 +98,31 @@ moveRotSol :: Int -> Vec -> Rotate -> PyTri -> Pythagoras -> FilePath -> IO ()
 moveRotSol n vec rot tri py fn = do
   sol <- moveSol vec . rotSol rot tri py <$> loadSolution n
   writeFile fn $ show sol
+
+
+simpleSolution :: Problem -> String
+simpleSolution p =
+    unlines ans
+  where
+    vs = concatMap (map snd.pvertice.snd) $ polygons p
+    (dx, dy) = (minimum $ map xcoord vs, minimum $ map ycoord vs)
+    mv (x, y) = (x+dx, y+dy)
+    vs' = map mv [(0,0), (1,0), (1,1), (0,1)]
+    ans = ["4", "0,0", "1,0", "1,1", "0,1", "1", "4 0 1 2 3"] ++ map showT vs'
+
+    showR r = show (numerator r) ++ "/" ++ show (denominator r)
+    showT (x, y) = showR x ++ "," ++ showR y
+
+genSimpleAnswer' :: Int -> IO ()
+genSimpleAnswer' n =
+    writeFile ("answers/"++show n++".dat") . simpleSolution =<< loadProblem n
+
+genSimpleAnswer :: Int -> IO ()
+genSimpleAnswer n = do
+  solFound  <-  doesFileExist $ solutionFile n
+  b         <-  doesFileExist $ problemFile n
+  if solFound
+    then putStrLn $ "solution file already exists: " ++ solutionFile n
+    else if b
+         then genSimpleAnswer' n
+         else fail $ "problem file not found: " ++ problemFile n

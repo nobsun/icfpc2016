@@ -2,15 +2,15 @@ module Problem where
 
 import Control.Arrow
 import Control.Monad
+import Data.List (find, delete)
 import Data.Maybe
-import GHC.Real
 
-import System.Directory
 import System.FilePath
 import Text.ParserCombinators.ReadP
 import Polygon
 import Segment
 import Vertex
+
 
 data Problem = Problem
   { nPolygon :: Int
@@ -70,24 +70,6 @@ loadProblem n = do
   maybe (fail "loadProblem: parse error") return
     $ listToMaybe [ x | (x, "") <- readP_to_S (parseProblem <* skipSpaces) q ]
 
-genSimpleAnswer :: Int -> IO ()
-genSimpleAnswer n = do
-  b <- doesFileExist $ "problems" </> show n <.> "dat"
-  if b
-    then do
-    p <- loadProblem n
-    let vs = concatMap (map snd.pvertice.snd) $ polygons p
-        (dx, dy) = (minimum $ map xcoord vs, minimum $ map ycoord vs)
-        vs' = map (mv (dx, dy)) [(0,0), (1,0), (1,1), (0,1)]
-        ans = ["4", "0,0", "1,0", "1,1", "0,1", "1", "4 0 1 2 3"] ++ map showT vs'
-    writeFile ("answers/"++show n++".dat") $ unlines ans
-    else return ()
-  where
-    mv (dx, dy) (x, y) = (x+dx, y+dy)
-    showR r = show (numerator r) ++ "/" ++ show (denominator r)
-    showT (x, y) = showR x ++ "," ++ showR y
-
-
 moveVertex :: Vec -> Vertex -> Vertex
 moveVertex (dx, dy) (Vertex x y) = (Vertex (x + dx) (y + dy))
 
@@ -119,23 +101,48 @@ combinations n' xs' = comb n' (length xs') xs' where
 
 -- | for facets only
 combinations' :: [a] -> [[a]]
-combinations' xs = concatMap (\n -> combinations n xs) size
-  where
-    size = [3..(length xs)]
+combinations' xs = concatMap (\n -> combinations n xs) [3..(length xs)]
 
-combine :: Maybe [Segment] -> Maybe [Segment] -> Maybe [Segment]
-combine Nothing   ys        = ys
-combine xs        Nothing   = xs
-combine (Just xs) (Just ys) =
-  let (x1, x2) = (fst . head &&& snd . last) xs
-      (y1, y2) = (fst . head &&& snd . last) ys
-  in
-    if      x1 == y1 then Just $ reverse xs ++ ys
-    else if x2 == y1 then Just $ xs         ++ ys
-    else if x1 == y2 then Just $ reverse xs ++ reverse ys
-    else if x2 == y2 then Just $ xs         ++ reverse ys
-    else Nothing
+toFacet :: [Segment] -> Maybe [Segment]
+toFacet xs =
+  maybe Nothing (\(sorted, rest) ->
+                   if null rest && cyclic sorted && convex sorted
+                   then Just sorted
+                   else Nothing
+                   )
+  $ sort' xs
+
+facets :: Problem -> [[Segment]]
+facets = filter (not.null) . map (maybe [] id .toFacet) . combinations' . segments
+
+sort' :: [Segment] -> Maybe ([Segment], [Segment])
+sort' xs = sort [head xs] (tail xs)
+
+sort :: [Segment] -> [Segment] -> Maybe ([Segment], [Segment])
+sort xs [] = Just (xs, [])
+sort xs ys =
+  let x2 = snd $ last xs
+      mnext = find (\(y1, y2) -> x2 == y1 || x2 == y2) ys
+  in maybe
+     Nothing
+     (\(y1, y2) ->
+        if x2 == y1
+        then sort (xs++[(y1,y2)]) $ delete (y1,y2) ys
+        else sort (xs ++ [(y2,y1)]) $ delete (y1,y2) ys)
+     mnext
 
 cyclic :: [Segment] -> Bool
 cyclic = uncurry (==) . (fst . head &&& snd . last)
 
+convex :: [Segment] -> Bool
+convex xs =
+  let (z:zs) = take (length xs) $ map (signum.crossProduct) $ zip vs' (tail vs')
+  in all (==z) zs
+  where
+    vs' = vs ++ vs'
+    vs = map seg2vec xs
+    seg2vec :: Segment -> (Rational, Rational)
+    seg2vec (Vertex x1 y1, Vertex x2 y2) = (x2 - x1, y2 -y1)
+
+crossProduct :: Num a => ((a, a), (a, a)) -> a
+crossProduct ((ax, ay), (bx, by)) = ax * by - ay * bx
