@@ -26,7 +26,7 @@ class SimpleTest {
       Vertex(1, 1),
       Vertex(1, 0))
     assertTrue(isInner(Vertex(Rational(1, 2), Rational(1, 2)), polygon))
-    assertTrue(isInner(Vertex(0, 0), polygon))
+    assertFalse(isInner(Vertex(0, 0), polygon))
     assertFalse(isInner(Vertex(-1, -1), polygon))
     assertFalse(isInner(Vertex(2, 2), polygon))
     assertFalse(isInner(Vertex(Rational(1, 2), -1), polygon))
