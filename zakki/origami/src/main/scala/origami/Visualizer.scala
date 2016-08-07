@@ -12,14 +12,18 @@ import java.io.File
 import origami.math._
 
 object Visualizer {
-  def saveImage(p: Problem, filename: String) = {
+  def saveImage(p: Problem, f: File) = {
+    if (!f.getParentFile().exists())
+      f.getParentFile().mkdirs()
     val img = drawImage(p)
-    ImageIO.write(img, "png", new File(filename))
+    ImageIO.write(img, "png", f)
   }
 
-  def saveImage(p: Solution, filename: String) = {
+  def saveImage(p: Solution, f: File) = {
+    if (!f.getParentFile().exists())
+      f.getParentFile().mkdirs()
     val img = drawImage(p)
-    ImageIO.write(img, "png", new File(filename))
+    ImageIO.write(img, "png", f)
   }
 
   def drawImage(p: Problem) = {
