@@ -3,6 +3,7 @@ import Control.Applicative
 import Control.Concurrent (threadDelay)
 import Data.Bool
 import Data.Maybe
+import qualified Data.Set as Set
 import Text.Read (readMaybe)
 import System.Directory (doesFileExist)
 import System.Environment (getArgs)
@@ -11,7 +12,7 @@ import File (solutionFile, problemFile, responseFile)
 import Command (runCommand)
 import ProblemDupes (genDupesMap)
 import REST.Response (SolutionSubmission (..))
-import REST.File (loadSolutionSubmission)
+import REST.File (loadSnapshot, getOwnProblemNums, loadSolutionSubmission)
 
 
 submitCopyInterval :: Maybe Int -> Int -> Int -> IO ()
@@ -60,6 +61,9 @@ main = do
     Just arg ->  maybe (fail "only sleep mili-second allowed") (return . Just) $ readMaybe arg
     Nothing  ->  return Nothing
 
-  dupes <- genDupesMap <$> getContents
+  ownSet <- maybe Set.empty Set.fromList . fmap getOwnProblemNums <$> loadSnapshot
+  let notOwnDup (o, cs) = (o, filter (`Set.notMember` ownSet) cs)
+
+  dupes <- map notOwnDup . genDupesMap <$> getContents
   mapM_ print dupes
   mapM_ (submitCopies sleep) dupes
