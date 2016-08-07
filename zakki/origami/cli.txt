@@ -50,5 +50,15 @@ CLI.solveWithHint(s, List(
 (21, 3), (-2, 0), (22, 4), (-2, 0), (23, 7), (-2, 0)
 ))
 
-, (0, 20)))
+import origami._
+val s = CLI.load(new java.io.File("../../problems/2074.dat"))
+CLI.solveWithHint(s, List((-1, 32), (0, 43), (1, 59), (-2, 0), (2, 65), (3, 98), (4, 85), (5, 88), (6, 35), (-2, 1), (1, 80)))
 
+CLI.solveWithHint(s, List((-1, 32), (0, 43), (1, 59), (-2, 0), (2, 65), (3, 98), (4, 85), (5, 88), (6, 35), (-2, 1)))
+
+import origami._
+val s = CLI.load(new java.io.File("../../problems/2074.dat"))
+CLI.solveWithHint(s, List((-1, 32), (0, 43), (1, 59), (-2, 0), (2, 65), (3, 98), (4, 85), (5, 88), (6, 35), (-2, 1), (3, 45)))
+
+
+CLI.thumb(s)
