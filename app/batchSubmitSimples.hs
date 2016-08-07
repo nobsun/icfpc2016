@@ -4,7 +4,7 @@ import System.IO.Error (tryIOError)
 import System.Directory (doesFileExist)
 
 import File (responseFile)
-import Solution (genSimpleAnswer)
+import Solution (genSimpleSolution)
 import Command (runCommand)
 import ProblemDupes (genDupesMap)
 
@@ -15,7 +15,7 @@ submitSimpleFirst n = do
   if found
     then putStrLn $ "response already exists: " ++ responseFile n
     else do
-    genSimpleAnswer n
+    genSimpleSolution n
     runCommand "./submit_solution.sh" [show n]
     threadDelay $ 3600 * 1000
 
