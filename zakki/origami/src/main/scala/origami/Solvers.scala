@@ -70,6 +70,7 @@ object Solver {
       for (j <- 1 until ps2.length) {
         es = es + Edge(ps2(j - 1), ps2(j))
       }
+      es = es + Edge(ps2.head, ps2.last)
     }
     es.toVector
 
