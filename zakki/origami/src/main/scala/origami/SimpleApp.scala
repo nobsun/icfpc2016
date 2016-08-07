@@ -24,6 +24,7 @@ object CreateProblemImages extends App {
       val p = new Reader(lines).readProblem
       println(p)
       Visualizer.saveImage(p, f.getAbsolutePath() + ".png")
+      SimpleApp.dumpFacet(Solver(p), f)
     } catch {
       case e: Throwable =>
         Console.err.println("parse error " + f)
@@ -33,6 +34,7 @@ object CreateProblemImages extends App {
   for (a <- args) {
     val f = new File(a)
     if (f.isFile()) {
+      if (f.getName.endsWith(".dat"))
       createImage(f)
     } else {
       for (ff <- f.listFiles().par if ff.isFile() && ff.getName.endsWith(".dat")) {
@@ -144,7 +146,9 @@ object SimpleApp extends App {
       val facet = solver.facets(i)
       println(f)
       println(solver.toFacet(facet))
-      val name = f.getName() + ".facets." + i + ".png"
+      val dir = new File(f.getParentFile, f.getName() + ".facets")
+      dir.mkdir()
+      val name = dir.getAbsolutePath + File.separator + i + ".png"
       println(">> " + name)
       val pf = Problem(Vector(Polygon(solver.toFacet(facet).vertices)), es)
       Visualizer.saveImage(pf, name)
@@ -161,7 +165,7 @@ object SimpleApp extends App {
   }
 
   if (true) {
-    solve(new File("../../problems/27.dat"))
+    solve(new File("../../problems/9.dat"))
     //solve(new File("../../problems/38.dat"))
     System.exit(0)
     val files = (for (
