@@ -2,6 +2,7 @@ module Problem where
 
 import Control.Arrow
 import Control.Monad
+import Data.List (find, delete)
 import Data.Maybe
 import GHC.Real
 
@@ -121,6 +122,36 @@ combinations n' xs' = comb n' (length xs') xs' where
 combinations' :: [a] -> [[a]]
 combinations' xs = concatMap (\n -> combinations n xs) [3..(length xs)]
 
+toFacet :: [Segment] -> Maybe [Segment]
+toFacet xs =
+  maybe Nothing (\(sorted, rest) ->
+                   if null rest && cyclic sorted
+                   then Just sorted
+                   else Nothing
+                   )
+  $ sort' xs
+
+
+facets :: Problem -> [[Segment]]
+facets = filter (not.null) . map (maybe [] id .toFacet) . combinations' . segments
+
+sort' :: [Segment] -> Maybe ([Segment], [Segment])
+sort' xs = sort [head xs] (tail xs)
+
+sort :: [Segment] -> [Segment] -> Maybe ([Segment], [Segment])
+sort xs [] = Just (xs, [])
+sort xs ys =
+  let x2 = snd $ last xs
+      mnext = find (\(y1, y2) -> x2 == y1 || x2 == y2) ys
+  in maybe
+     Nothing
+     (\(y1, y2) ->
+        if x2 == y1
+        then sort (xs++[(y1,y2)]) $ delete (y1,y2) ys
+        else sort (xs ++ [(y2,y1)]) $ delete (y1,y2) ys)
+     mnext
+     
+    
 combine :: Maybe [Segment] -> Maybe [Segment] -> Maybe [Segment]
 combine Nothing   ys        = ys
 combine xs        Nothing   = xs
