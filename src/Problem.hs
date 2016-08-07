@@ -4,15 +4,13 @@ import Control.Arrow
 import Control.Monad
 import Data.List (find, delete)
 import Data.Maybe
-import GHC.Real
 
-import System.Directory
 import System.FilePath
 import Text.ParserCombinators.ReadP
 import Polygon
 import Segment
 import Vertex
-import File (problemFile, solutionFile)
+
 
 data Problem = Problem
   { nPolygon :: Int
@@ -71,27 +69,6 @@ loadProblem n = do
   q <- readFile $ "problems" </> show n <.> "dat"
   maybe (fail "loadProblem: parse error") return
     $ listToMaybe [ x | (x, "") <- readP_to_S (parseProblem <* skipSpaces) q ]
-
-genSimpleAnswer :: Int -> IO ()
-genSimpleAnswer n = do
-  solFound  <-  doesFileExist $ solutionFile n
-  b         <-  doesFileExist $ problemFile n
-  if solFound
-    then putStrLn $ "solution file already exists: " ++ solutionFile n
-    else if b
-         then do
-           p <- loadProblem n
-           let vs = concatMap (map snd.pvertice.snd) $ polygons p
-               (dx, dy) = (minimum $ map xcoord vs, minimum $ map ycoord vs)
-               vs' = map (mv (dx, dy)) [(0,0), (1,0), (1,1), (0,1)]
-               ans = ["4", "0,0", "1,0", "1,1", "0,1", "1", "4 0 1 2 3"] ++ map showT vs'
-           writeFile ("answers/"++show n++".dat") $ unlines ans
-         else putStrLn $ "problem file not found: " ++ problemFile n
-  where
-    mv (dx, dy) (x, y) = (x+dx, y+dy)
-    showR r = show (numerator r) ++ "/" ++ show (denominator r)
-    showT (x, y) = showR x ++ "," ++ showR y
-
 
 moveVertex :: Vec -> Vertex -> Vertex
 moveVertex (dx, dy) (Vertex x y) = (Vertex (x + dx) (y + dy))
