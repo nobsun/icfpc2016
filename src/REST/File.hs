@@ -1,5 +1,8 @@
 module REST.File where
 
+import Data.Bool (bool)
+import System.Directory (doesFileExist)
+
 import File (responseFile)
 import REST.Response
   (BlobSnapshot (..), Problem (..), SolutionSubmission (..))
@@ -18,5 +21,6 @@ getOwnProblemNums :: BlobSnapshot -> [Int]
 getOwnProblemNums  = map problem_problem_id . filter ((== sampouTeamId)  . problem_owner) . blobSnapshot_problems
 
 loadSolutionSubmission :: Int -> IO (Maybe SolutionSubmission)
-loadSolutionSubmission n =
-  Aeson.decode <$> LB.readFile (responseFile n)
+loadSolutionSubmission n = do
+  let fn = responseFile n
+  bool (return Nothing) (Aeson.decode <$> LB.readFile fn) =<< doesFileExist fn

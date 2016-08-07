@@ -70,6 +70,7 @@ object Solver {
       for (j <- 1 until ps2.length) {
         es = es + Edge(ps2(j - 1), ps2(j))
       }
+      es = es + Edge(ps2.head, ps2.last)
     }
     es.toVector
 
@@ -324,6 +325,8 @@ class Solver(val problem: Problem,
 
   def dump(node: Node): String = {
     val trans = normalTrans(node.toFacets())
+    if (trans.isEmpty)
+      Console.out.println("no normalize transform" + node.toFacets())
 	  val tvs = node.tfacets.flatMap(t => t.vertices).toSet.toVector
 	  val tvsn = trans.map(tr => tvs.map(v => tr.transform(v))).getOrElse(tvs)
 	  var str = tvs.length + "\n"
@@ -434,8 +437,12 @@ class Solver(val problem: Problem,
 
   def normalTrans(fs: Seq[Facet]): Option[Transform] = {
     val vs0 = fs.flatMap((f: Facet) => f.vertices).toSet
-    val vs = vs0.toList
-      .sortBy { _.x }
+    val vs = vs0.toList.sortWith((a: Vertex, b: Vertex) => {
+        if (a.x == b.x)
+          a.y < b.y
+        else
+          a.x < b.x
+      })
     if (vs.length < 4)
       return None
     val v0 = vs(0)
@@ -454,7 +461,7 @@ class Solver(val problem: Problem,
     val l = du dot du
     val dv = Vertex(du.y, -du.x)
     val r2 = vs.map(v => (v - v0) dot (v - v0)).max
-    println("**** " + l + "  "+ r2)
+    println("**** L^2:" + l + "  R^2:"+ r2)
     if (l > 1)
       return None
     if (r2 > 2)
