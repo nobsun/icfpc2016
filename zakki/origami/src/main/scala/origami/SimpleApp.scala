@@ -73,6 +73,9 @@ object CreateSolutionImages extends App {
 }
 
 object CLI {
+  def thumb(solver: Solver) = {
+    dumpFacet(solver, new File("out"))
+  }
   def solveWithHint(solver: Solver, series: List[(Int, Int)]) = {
     val series_ =
       List((-1, 2), (0, 3), (1, 5), (2, 29), (0, 32), (0, 2), (-2, 16))
@@ -83,9 +86,10 @@ object CLI {
       val fs = n.toFacets()
       val es = n.eset.keys.toVector
       val p1 = Problem(fs.map(f => Polygon(f.vertices)), es)
-      println(p1)
+      //println(p1)
 
       val t = solver.isSquare(fs)
+      println(i + ": " + t)
       if (t == Solver.OK) {
         val str = solver.dump(n)
         println("**answer*******")

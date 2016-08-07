@@ -329,7 +329,7 @@ class Solver(val problem: Problem,
 	  var str = tvs.length + "\n"
 	  str += tvsn.map(v => v.x + "," + v.y).mkString("\n")
 	  str += "\n"
-	  str += node.tfacets.length "\n"
+	  str += node.tfacets.length + "\n"
 	  for (t <- node.tfacets) {
 	    str += t.vertices.length
 	    str += " "
@@ -487,7 +487,7 @@ class Solver(val problem: Problem,
     val l = du dot du
     val dv = Vertex(du.y, -du.x)
     val r2 = vs.map(v => (v - v0) dot (v - v0)).max
-    println("**** " + l + "  "+ r2)
+    println("****size " + l + "  "+ r2)
     if (l > 1)
       return MORE
     if (r2 > 2)
@@ -528,8 +528,13 @@ class Solver(val problem: Problem,
 
   def isSquare(fs: Seq[Facet]): Int = {
     val vs0 = fs.flatMap((f: Facet) => f.vertices).toSet
-    val vs = vs0.toList
-      .sortBy { _.x }
+    val vs = vs0.toList.sortWith((a: Vertex, b: Vertex) => {
+        if (a.x == b.x)
+          a.y < b.y
+        else
+          a.x < b.x
+      })
+      //.sortBy { _.x }
     if (vs.length < 4) {
       println("few vertex")
       return LESS
