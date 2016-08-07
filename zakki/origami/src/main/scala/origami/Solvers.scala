@@ -270,11 +270,8 @@ class Solver(val problem: Problem,
   }
 
   def hint(): List[Node] = {
-    val series = List((-1, 28), (0, 8), (1, 27),
-      (0, 28), (1, 8), (2, 27),
-      (3, 28), (4, 8), (5, 27),
-      (6, 28), (7, 8), (8, 27),
-      (9, 28), (10, 8), (11, 27))
+    val series = List((-1, 2), (0, 3), (1, 5), (2, 29), (0, 32),
+        (0, 2))//, (-2, 16))
 
     val ((_, s) :: rest) = series
     val c = createRootNode(s)
@@ -283,19 +280,31 @@ class Solver(val problem: Problem,
 
   def createHintNode(series: List[(Int, Int)], ns: List[Node]): List[Node] = {
     var r: List[Node] = Nil
+    var i = 0
     for (n <- ns) {
       series match {
         case (t, s) :: rest =>
           val cs = {
             if (t >= 0)
               n.expand(n.tfacets(t))
-            else
+            else if (t == -1)
               n.expand()
+            else if (t == -2) {
+              println(">>> select node " + t + "/" + s )
+              println(ns.length + " " + ns)
+              if (n == ns(s))
+                List(n)
+              else
+                Nil
+            } else {
+              Nil
+            }
           }.filter(c => c.tfacets.last.fid === s)
           r :::= createHintNode(rest, cs)
         case Nil =>
           r ::= n
       }
+      i += 1
     }
     r
   }
@@ -374,7 +383,7 @@ class Solver(val problem: Problem,
             val vid = f2.vertices(j)
             if (vmap.contains(tv) && vmap(tv) != vid) {
               //invalid
-              println("  mismatch " + vmap(tv) + "/" + vid)
+              //println("  mismatch " + vmap(tv) + "/" + vid)
               valid = false
             } else if (tfacets.exists(f => f.vertices.toSet == vs.toSet)) {
               //println("  same ")

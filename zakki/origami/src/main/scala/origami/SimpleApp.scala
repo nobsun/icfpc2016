@@ -77,7 +77,6 @@ object SimpleApp extends App {
     println(f)
     val queue = new scala.collection.mutable.Queue[solver.Node]
     //val queue = new scala.collection.mutable.Stack[solver.Node]
-    queue ++= solver.createRoot()
     if (true) {
       val hs = solver.hint()
       println("#####")
@@ -88,22 +87,25 @@ object SimpleApp extends App {
         val p1 = Problem(fs.map(f => Polygon(f.vertices)), es)
         println(p1)
 
-        for (f <- n.tfacets; f2 <- n.tfacets if f != f2) {
-          if (intersect(f.vertices, f2.vertices))
-            println("  intersect " + f.vertices + "/" + f2.vertices)
-        }
+//        for (f <- n.tfacets; f2 <- n.tfacets if f != f2) {
+//          if (intersect(f.vertices, f2.vertices))
+//            println("  intersect " + f.vertices + "/" + f2.vertices)
+//        }
         val t = solver.isSquare(fs)
         if (t == Solver.MORE) {
           println(">> " + t)
+          Visualizer.saveImage(p1, new File("out", "hint." + i + "out.png"))
         } else {
-          val name = f.getAbsolutePath + ".hint." + i + ".png"
-          println(">> " + name)
-          Visualizer.saveImage(p1, new File("out", f.getName() + ".png"))
+          //val name = f.getAbsolutePath + ".hint." + i + ".png"
+          //println(">> " + name)
+          Visualizer.saveImage(p1, new File("out", "hint." + i + ".png"))
         }
       }
 
       queue ++= hs
     }
+
+    //queue ++= solver.createRoot()
     //queue.pushAll(solver.createRoot())
     var i = 0
     while (i < num && !queue.isEmpty) {
@@ -160,13 +162,13 @@ object SimpleApp extends App {
     val p = new Reader(lines).readProblem
     val solver = Solver(p)
 
-    dumpFacet(solver, new File(f.getName + ".facet"))
+    dumpFacet(solver, new File("out"))
     solve(solver, f, 500)
   }
 
   if (true) {
-    solve(new File("../../problems/9.dat"))
-    //solve(new File("../../problems/38.dat"))
+    //solve(new File("../../problems/9.dat"))
+    solve(new File("../../problems/25.dat"))
     System.exit(0)
     val files = (for (
       f <- new File("../../problems/").listFiles() if f.getName.endsWith(".dat")
