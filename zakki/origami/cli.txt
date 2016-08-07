@@ -83,6 +83,9 @@ CLI.solveWithHint(s, List(
 (3, 31), (4, 11), (6, 33),
 (6, 31), (9, 11), (8, 33)))
 
+val s = CLI.load(new java.io.File("../../problems/1294.dat"))
+CLI.solveWithHint(s, List((-1, 0), (0, 2), (1, 48), (2, 41), (3, 27), (0, 4), (-2, 1) , (0, 45), (2, 45) ))
+
 CLI.thumb(s)
 
 2074 3184 1778 49
