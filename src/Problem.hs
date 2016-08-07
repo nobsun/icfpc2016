@@ -110,8 +110,9 @@ movePoly vec (Polygon nv vs)
 
 
 combinations :: Int -> [a] -> [[a]]
-combinations n xs = comb n (length xs) xs where
-  comb 0 _ _ = [[]]
+combinations n' xs' = comb n' (length xs') xs' where
+  comb _ _ [] = [[]]
+  comb 0 _ _  = [[]]
   comb r n a@(x:xs)
     | n == r = [a]
     | otherwise = map (x:) (comb (r-1) (n-1) xs) ++ comb r (n-1) xs
@@ -138,7 +139,3 @@ combine (Just xs) (Just ys) =
 cyclic :: [Segment] -> Bool
 cyclic = uncurry (==) . (fst . head &&& snd . last)
 
-type Facet = [Segment]
-
-facets :: [Segment] -> [Facet]
-facets = undefined
