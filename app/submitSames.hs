@@ -7,11 +7,12 @@ import Data.Maybe
 import Data.List (stripPrefix, isSuffixOf, sort)
 import Data.List.Split (splitOn)
 import Text.Read (readMaybe)
-import System.FilePath
 import System.Directory (doesFileExist)
 import System.Process (rawSystem)
 import System.Exit
 import System.Environment (getArgs)
+
+import File (solutionFile, problemFile)
 
 
 takeProblemNum :: String -> Maybe Int
@@ -30,12 +31,6 @@ genDupesMap =
   filter (not . null)
   . mapMaybe (uncons . sort . mapMaybe takeProblemNum)
   . splitOn [""] . lines
-
-solutionFile :: Int -> FilePath
-solutionFile n = "answers" </> show n <.> "dat"
-
-problemFile :: Int -> FilePath
-problemFile n = "problems" </> show n <.> "dat"
 
 runCommand :: String -> [String] -> IO ()
 runCommand cmd args = do
