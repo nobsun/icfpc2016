@@ -58,6 +58,28 @@ class SimpleTest {
         Vertex(4, 5)))
 
     assertEquals(Vertex(0, 0),
+      _transform(
+        Edge(Vertex(10, 50), Vertex(15, 50)),
+        Edge(Vertex(0, 0), Vertex(5, 0)),
+        Vertex(10, 50)))
+    assertEquals(Vertex(1, 10),
+      _transform(
+        Edge(Vertex(10, 50), Vertex(15, 50)),
+        Edge(Vertex(0, 0), Vertex(5, 0)),
+        Vertex(11, 60)))
+
+    assertEquals(Vertex(0, 0),
+      _transform(
+        Edge(Vertex(10, 50), Vertex(11, 49)),
+        Edge(Vertex(0, 0), Vertex(1, 1)),
+        Vertex(10, 50)))
+    assertEquals(Vertex(1, 1),
+      _transform(
+        Edge(Vertex(10, 50), Vertex(11, 49)),
+        Edge(Vertex(0, 0), Vertex(1, 1)),
+        Vertex(11, 49)))
+
+    assertEquals(Vertex(0, 0),
       transform(
         Edge(Vertex(0, 0), Vertex(1, 0)),
         Edge(Vertex(0, 0), Vertex(0, 1)),
@@ -103,5 +125,32 @@ class SimpleTest {
         Vertex(r"3/5", r"4/5"),
         Vertex(r"-1/5", r"7/5"),
         Vertex(r"-4/5", r"3/5"))))
+  }
+  
+  @Test
+  def testCross(): Unit = {
+    val c1 = crossPoint(
+        Vertex(0, 5),
+        Vertex(2, 5),
+        Vertex(1, 0),
+        Vertex(1, 20))
+    assertTrue(c1.isDefined)
+    assertEquals(Vertex(1, 5), c1.get)
+    
+    val c2 = crossPoint(
+        Vertex(0, 5),
+        Vertex(2, 5),
+        Vertex(1, 5),
+        Vertex(1, 20))
+    assertTrue(c2.isDefined)
+    assertEquals(Vertex(1, 5), c2.get)
+    
+    val c3 = crossPoint(
+        Vertex(r"16/25", r"9/50"),
+        Vertex(r"2/5", r"1/2"),
+        Vertex(r"1", r"2/5"),
+        Vertex(r"7/20", r"2/5"))
+    assertTrue(c3.isDefined)
+    assertEquals(Vertex(r"19/40", r"2/5"), c3.get)
   }
 }
