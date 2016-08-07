@@ -26,6 +26,7 @@ library
                      , Move
                      , ProblemSubmit
                      , File
+                     , Command
 
                      , REST.Response
 
@@ -35,6 +36,7 @@ library
                      , bytestring
                      , directory >= 1.2.2.0
                      , filepath >= 1.4.0.0
+                     , process
                      , fgl >= 5.5
   default-language:    Haskell2010
   ghc-options:       -Wall
