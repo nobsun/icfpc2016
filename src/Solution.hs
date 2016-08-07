@@ -113,16 +113,16 @@ simpleSolution p =
     showR r = show (numerator r) ++ "/" ++ show (denominator r)
     showT (x, y) = showR x ++ "," ++ showR y
 
-genSimpleAnswer' :: Int -> IO ()
-genSimpleAnswer' n =
-    writeFile ("answers/"++show n++".dat") . simpleSolution =<< loadProblem n
-
-genSimpleAnswer :: Int -> IO ()
-genSimpleAnswer n = do
+genSimpleSolution :: Int -> IO ()
+genSimpleSolution n = do
   solFound  <-  doesFileExist $ solutionFile n
   b         <-  doesFileExist $ problemFile n
   if solFound
     then putStrLn $ "solution file already exists: " ++ solutionFile n
     else if b
-         then genSimpleAnswer' n
+         then writeFile ("answers/"++show n++".dat") . simpleSolution =<< loadProblem n
          else fail $ "problem file not found: " ++ problemFile n
+
+{-# DEPRECATED genSimpleAnswer "Use genSimpleSolution instead of this." #-}
+genSimpleAnswer :: Int -> IO ()
+genSimpleAnswer = genSimpleSolution
