@@ -129,12 +129,11 @@ combinations' xs = concatMap (\n -> combinations n xs) [3..(length xs)]
 toFacet :: [Segment] -> Maybe [Segment]
 toFacet xs =
   maybe Nothing (\(sorted, rest) ->
-                   if null rest && cyclic sorted
+                   if null rest && cyclic sorted && convex sorted
                    then Just sorted
                    else Nothing
                    )
   $ sort' xs
-
 
 facets :: Problem -> [[Segment]]
 facets = filter (not.null) . map (maybe [] id .toFacet) . combinations' . segments
@@ -154,20 +153,19 @@ sort xs ys =
         then sort (xs++[(y1,y2)]) $ delete (y1,y2) ys
         else sort (xs ++ [(y2,y1)]) $ delete (y1,y2) ys)
      mnext
-     
-    
-combine :: Maybe [Segment] -> Maybe [Segment] -> Maybe [Segment]
-combine Nothing   ys        = ys
-combine xs        Nothing   = xs
-combine (Just xs) (Just ys) =
-  let (x1, x2) = (fst . head &&& snd . last) xs
-      (y1, y2) = (fst . head &&& snd . last) ys
-  in
-    if      x1 == y1 then Just $ reverse xs ++ ys
-    else if x2 == y1 then Just $ xs         ++ ys
-    else if x1 == y2 then Just $ reverse xs ++ reverse ys
-    else if x2 == y2 then Just $ xs         ++ reverse ys
-    else Nothing
 
 cyclic :: [Segment] -> Bool
 cyclic = uncurry (==) . (fst . head &&& snd . last)
+
+convex :: [Segment] -> Bool
+convex xs =
+  let (z:zs) = take (length xs) $ map (signum.crossProduct) $ zip vs' (tail vs')
+  in all (==z) zs
+  where
+    vs' = vs ++ vs'
+    vs = map seg2vec xs
+    seg2vec :: Segment -> (Rational, Rational)
+    seg2vec (Vertex x1 y1, Vertex x2 y2) = (x2 - x1, y2 -y1)
+
+crossProduct :: Num a => ((a, a), (a, a)) -> a
+crossProduct ((ax, ay), (bx, by)) = ax * by - ay * bx
