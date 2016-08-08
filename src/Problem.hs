@@ -107,7 +107,7 @@ combinations' xs = concatMap (\n -> combinations n xs) [3..(length xs)]
 toFacet :: [Segment] -> Maybe [Segment]
 toFacet xs =
   maybe Nothing (\(sorted, rest) ->
-                   if null rest && cyclic sorted && convex sorted -- && not (intersected' sorted)
+                   if null rest && cyclic sorted && convex sorted && not (intersected' sorted)
                    then Just sorted
                    else Nothing
                    )
