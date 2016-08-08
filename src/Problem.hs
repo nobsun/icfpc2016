@@ -143,8 +143,8 @@ cyclic = uncurry (==) . (fst . head &&& snd . last)
 
 convex :: [Segment] -> Bool
 convex xs =
-  let (z:zs) = take (length xs) $ map (signum.crossProduct) $ zip vs' (tail vs')
-  in all (\x -> x==z || x == 0) zs
+  let (z:zs) = filter (/=0) $ take (length xs) $ map (signum.crossProduct) $ zip vs' (tail vs')
+  in all (==z) zs
   where
     vs' = vs ++ vs'
     vs = map seg2vec xs
