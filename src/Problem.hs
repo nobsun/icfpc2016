@@ -179,3 +179,7 @@ intersected ((Vertex ax ay, Vertex bx by), (Vertex cx cy, Vertex dx dy)) =
     tb = cx_dx * by_cy + cy_dy * cx_bx
     tc = ax_bx * cy_ay + ay_by * ax_cx
     td = ax_bx * dy_ay + ay_by * ax_dx
+
+online :: Vertex -> Segment -> Bool
+online v (v1, v2) = v /= v1 && v /= v2 &&
+  distance' (v, v1) + distance' (v, v2) == (distance' (v1, v2) :: Rational)
