@@ -106,7 +106,7 @@ combinations' xs = concatMap (\n -> combinations n xs) [3..(length xs)]
 toFacet :: [Segment] -> Maybe [Segment]
 toFacet xs =
   maybe Nothing (\(sorted, rest) ->
-                   if null rest && cyclic sorted && convex sorted
+                   if null rest && cyclic sorted && convex sorted && not (intersected' sorted)
                    then Just sorted
                    else Nothing
                    )
@@ -163,3 +163,25 @@ volume (x:xs) = let v = foldr (+) 0 (map vol trigons)
     trigons = take (length xs - 1) $ map (\(y,z) -> (x, y, z)) $ zip xs' (tail xs')
     seg2vec :: Segment -> (Rational, Rational)
     seg2vec (Vertex x1 y1, Vertex x2 y2) = (x2 - x1, y2 -y1)
+
+intersected' :: [Segment] -> Bool
+intersected' [] = False
+intersected' (x:xs) =
+  intersected' xs ||
+  any (\z -> not (neighber (x,z)) && intersected (x,z)) xs
+  where
+    -- already sorted (connected)
+    neighber :: (Segment, Segment) -> Bool
+    neighber ((v1, v2), (w1, w2)) = v2 == w1 || w2 == v1
+
+intersected :: (Segment, Segment) -> Bool
+intersected ((Vertex ax ay, Vertex bx by), (Vertex cx cy, Vertex dx dy)) =
+  tc * td < 0 && ta * tb < 0
+  where
+    (cx_dx, ay_cy, cy_dy, cx_ax) = (cx - dx, ay - cy, cy - dy, cx - ax)
+    (by_cy, cx_bx, ax_bx, cy_ay) = (by - cy, cx - bx, ax - bx, cy - ay)
+    (ay_by, ax_cx, dy_ay, ax_dx) = (ay - by, ax - cx, dy - ay, ax - dx)
+    ta = cx_dx * ay_cy + cy_dy * cx_ax
+    tb = cx_dx * by_cy + cy_dy * cx_bx
+    tc = ax_bx * cy_ay + ay_by * ax_cx
+    td = ax_bx * dy_ay + ay_by * ax_dx
