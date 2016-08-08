@@ -107,7 +107,7 @@ combinations' xs = concatMap (\n -> combinations n xs) [3..(length xs)]
 toFacet :: [Segment] -> Maybe [Segment]
 toFacet xs =
   maybe Nothing (\(sorted, rest) ->
-                   if null rest && cyclic sorted && convex sorted && not (intersected' sorted)
+                   if null rest && cyclic sorted && convex sorted -- && not (intersected' sorted)
                    then Just sorted
                    else Nothing
                    )
@@ -117,10 +117,10 @@ toFacet xs =
 -- all facets using splitSegments
 facets' :: Problem -> [[Segment]]
 facets' =
-  filter (not.null) . map (maybe [] id .toFacet) . combinations' . splitSegments . segments
+  filter (not.null).map (maybe [] id.toFacet).combinations'.splitSegments.segments
 
 facets :: Problem -> [[Segment]]
-facets = filter (not.null) . map (maybe [] id .toFacet) . combinations' . segments
+facets = filter (not.null).map (maybe [] id.toFacet).combinations'.segments
 
 chainSort' :: [Segment] -> Maybe ([Segment], [Segment])
 chainSort' xs = chainSort [head xs] (tail xs)
@@ -144,7 +144,7 @@ cyclic = uncurry (==) . (fst . head &&& snd . last)
 convex :: [Segment] -> Bool
 convex xs =
   let (z:zs) = take (length xs) $ map (signum.crossProduct) $ zip vs' (tail vs')
-  in all (==z) zs
+  in all (\x -> x==z || x == 0) zs
   where
     vs' = vs ++ vs'
     vs = map seg2vec xs
