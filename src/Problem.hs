@@ -4,6 +4,7 @@ import Control.Arrow
 import Control.Monad
 import Data.List (find, delete)
 import Data.Maybe
+import GHC.Real
 
 import System.FilePath
 import Text.ParserCombinators.ReadP
@@ -145,3 +146,20 @@ convex xs =
 
 crossProduct :: Num a => ((a, a), (a, a)) -> a
 crossProduct ((ax, ay), (bx, by)) = ax * by - ay * bx
+
+volume' :: [Segment] -> Rational
+volume' = volume . map fst
+
+volume :: [Vertex] -> Rational
+volume [] = 0
+volume (x:xs) = let v = foldr (+) 0 (map vol trigons)
+                in numerator v % (2 * denominator v)
+  where
+    vol :: (Vertex, Vertex, Vertex) -> Rational
+    vol (v1, v2, v3) = crossProduct (seg2vec (v2, v1), seg2vec (v3, v2))
+    xs' :: [Vertex]
+    xs' = xs ++ xs'
+    trigons :: [(Vertex, Vertex, Vertex)]
+    trigons = take (length xs - 1) $ map (\(y,z) -> (x, y, z)) $ zip xs' (tail xs')
+    seg2vec :: Segment -> (Rational, Rational)
+    seg2vec (Vertex x1 y1, Vertex x2 y2) = (x2 - x1, y2 -y1)
