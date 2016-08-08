@@ -108,10 +108,28 @@ toFacet :: [Segment] -> Maybe [Segment]
 toFacet xs =
   maybe Nothing (\(sorted, rest) ->
                    if null rest && cyclic sorted && convex sorted && not (intersected' sorted)
-                   then Just sorted
+                   then Just (simplify sorted)
                    else Nothing
                    )
   $ chainSort' xs
+  where
+    simplify :: [Segment] -> [Segment]
+    simplify ss = let (ss', h, l) = (merge ss, head ss', last ss')
+                  in if crossProduct ((seg2vec h), (seg2vec l)) == 0
+                     then tail ss' ++ [joint l h]
+                     else ss'
+
+merge :: [Segment] -> [Segment]
+merge [] = []
+merge (x:xs) = sub [] x xs
+  where
+    sub rs t [] = reverse (t:rs)
+    sub rs t (s:ss) = if crossProduct ((seg2vec t), (seg2vec s)) == 0
+                      then sub rs (joint t s) ss
+                      else sub (t:rs) s ss
+
+joint :: Segment -> Segment -> Segment
+joint (x1, _) (_, y2) = (x1, y2)
 
 -- |
 -- all facets using splitSegments
