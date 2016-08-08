@@ -9,7 +9,7 @@ bsleep=$1
 set -x
 
 # CLEAN
-rm -f snapshots.json bloblookup.json
+##rm -f snapshots.json bloblookup.json
 
 # GET Snapshot
 curl --compressed -L -H Expect: -H 'X-API-Key: 49-99eab0ca16efde61012b3a535bab0edb' 'http://2016sv.icfpcontest.org/api/snapshot/list' > snapshots.json.new
