@@ -164,7 +164,7 @@ volume' = volume . map fst
 volume :: [Vertex] -> Rational
 volume [] = 0
 volume (x:xs) = let v = foldr (+) 0 (map vol trigons)
-                in numerator v % (2 * denominator v)
+                in abs (numerator v % (2 * denominator v))
   where
     vol :: (Vertex, Vertex, Vertex) -> Rational
     vol (v1, v2, v3) = crossProduct (seg2vec (v2, v1), seg2vec (v3, v2))
