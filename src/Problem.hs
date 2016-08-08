@@ -2,7 +2,8 @@ module Problem where
 
 import Control.Arrow
 import Control.Monad
-import Data.List (find, delete)
+import Data.List (find, delete, sortBy)
+import Data.Function (on)
 import Data.Maybe
 import GHC.Real
 
@@ -110,25 +111,31 @@ toFacet xs =
                    then Just sorted
                    else Nothing
                    )
-  $ sort' xs
+  $ chainSort' xs
+
+-- |
+-- all facets using splitSegments
+facets' :: Problem -> [[Segment]]
+facets' =
+  filter (not.null) . map (maybe [] id .toFacet) . combinations' . splitSegments . segments
 
 facets :: Problem -> [[Segment]]
 facets = filter (not.null) . map (maybe [] id .toFacet) . combinations' . segments
 
-sort' :: [Segment] -> Maybe ([Segment], [Segment])
-sort' xs = sort [head xs] (tail xs)
+chainSort' :: [Segment] -> Maybe ([Segment], [Segment])
+chainSort' xs = chainSort [head xs] (tail xs)
 
-sort :: [Segment] -> [Segment] -> Maybe ([Segment], [Segment])
-sort xs [] = Just (xs, [])
-sort xs ys =
+chainSort :: [Segment] -> [Segment] -> Maybe ([Segment], [Segment])
+chainSort xs [] = Just (xs, [])
+chainSort xs ys =
   let x2 = snd $ last xs
       mnext = find (\(y1, y2) -> x2 == y1 || x2 == y2) ys
   in maybe
      Nothing
      (\(y1, y2) ->
         if x2 == y1
-        then sort (xs++[(y1,y2)]) $ delete (y1,y2) ys
-        else sort (xs ++ [(y2,y1)]) $ delete (y1,y2) ys)
+        then chainSort (xs++[(y1,y2)]) $ delete (y1,y2) ys
+        else chainSort (xs ++ [(y2,y1)]) $ delete (y1,y2) ys)
      mnext
 
 cyclic :: [Segment] -> Bool
@@ -179,7 +186,17 @@ intersected ((Vertex ax ay, Vertex bx by), (Vertex cx cy, Vertex dx dy)) =
     tb = cx_dx * by_cy + cy_dy * cx_bx
     tc = ax_bx * cy_ay + ay_by * ax_cx
     td = ax_bx * dy_ay + ay_by * ax_dx
-
 online :: Vertex -> Segment -> Bool
 online v (v1, v2) = v /= v1 && v /= v2 &&
   distance' (v, v1) + distance' (v, v2) == (distance' (v1, v2) :: Rational)
+
+split :: Segment -> [Vertex] -> [Segment]
+split s@(v1, v2) vs = (zip <*> tail) orderedOnlineVertexes
+  where
+    onlineVertexes = filter (`online` s) vs
+    orderedOnlineVertexes = sortBy (compare `on` (sqDistance.(Vertex 0 0,))) (v1:v2:onlineVertexes)
+
+splitSegments :: [Segment] -> [Segment]
+splitSegments xs = concatMap (\x -> split x vs) xs
+  where
+    vs = foldr (\(v1,v2) r -> v1:v2:r) [] xs
