@@ -166,13 +166,7 @@ volume (x:xs) = let v = foldr (+) 0 (map vol trigons)
 
 intersected' :: [Segment] -> Bool
 intersected' [] = False
-intersected' (x:xs) =
-  intersected' xs ||
-  any (\z -> not (neighber (x,z)) && intersected (x,z)) xs
-  where
-    -- already sorted (connected)
-    neighber :: (Segment, Segment) -> Bool
-    neighber ((v1, v2), (w1, w2)) = v2 == w1 || w2 == v1
+intersected' (x:xs) = intersected' xs ||  any (intersected.(x,)) xs
 
 intersected :: (Segment, Segment) -> Bool
 intersected ((Vertex ax ay, Vertex bx by), (Vertex cx cy, Vertex dx dy)) =
